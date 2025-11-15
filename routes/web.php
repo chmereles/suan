@@ -15,7 +15,6 @@ Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-
 Route::middleware(['auth', 'verified']) // y el middleware de rol que uses
     ->prefix('admin/attendance/sync')
     ->name('attendance.sync.')
@@ -24,5 +23,5 @@ Route::middleware(['auth', 'verified']) // y el middleware de rol que uses
         Route::post('/run', [SyncController::class, 'run'])->name('run');
     });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/admin/attendance.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/admin/attendance.php';

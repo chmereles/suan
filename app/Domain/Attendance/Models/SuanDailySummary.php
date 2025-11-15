@@ -32,20 +32,18 @@ class SuanDailySummary extends Model
     ];
 
     protected $casts = [
-        'date'                 => 'date',
+        'date' => 'date',
         'total_worked_minutes' => 'integer',
-        'justified'            => 'boolean',
+        'justified' => 'boolean',
     ];
 
     /** Relaciones */
-
     public function employee(): BelongsTo
     {
         return $this->belongsTo(SuanEmployee::class, 'employee_id');
     }
 
     /** Scopes */
-
     public function scopeForDate($query, $date)
     {
         return $query->where('date', $date);

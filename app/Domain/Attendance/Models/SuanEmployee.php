@@ -34,12 +34,11 @@ class SuanEmployee extends Model
     ];
 
     protected $casts = [
-        'active'    => 'boolean',
+        'active' => 'boolean',
         'synced_at' => 'datetime',
     ];
 
     /** Relaciones */
-
     public function attendanceRecords(): HasMany
     {
         return $this->hasMany(SuanAttendanceRecord::class, 'employee_id');
@@ -66,7 +65,6 @@ class SuanEmployee extends Model
     }
 
     /** Scopes */
-
     public function scopeActive($query)
     {
         return $query->where('active', true);

@@ -32,14 +32,12 @@ class SuanLicense extends Model
     ];
 
     /** Relaciones */
-
     public function employee(): BelongsTo
     {
         return $this->belongsTo(SuanEmployee::class, 'employee_id');
     }
 
     /** Scopes */
-
     public function scopeForDate($query, $date)
     {
         return $query->where('date', $date);

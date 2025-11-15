@@ -21,6 +21,6 @@ class CrossChexLog extends Model
 
     protected $casts = [
         'checktime' => 'datetime',
-        'raw'       => 'array',
+        'raw' => 'array',
     ];
 }

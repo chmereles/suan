@@ -34,14 +34,12 @@ class SuanManualNote extends Model
     ];
 
     /** Relaciones */
-
     public function employee(): BelongsTo
     {
         return $this->belongsTo(SuanEmployee::class, 'employee_id');
     }
 
     /** Scopes */
-
     public function scopeType($query, string $type)
     {
         return $query->where('note_type', $type);

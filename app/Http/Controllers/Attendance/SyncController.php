@@ -19,16 +19,16 @@ class SyncController
 
         $logs = $logsQuery->paginate(15)->through(function (AttendanceSyncLog $log) {
             return [
-                'id'             => $log->id,
-                'source'         => $log->source,
-                'triggered_by'   => $log->triggered_by,
+                'id' => $log->id,
+                'source' => $log->source,
+                'triggered_by' => $log->triggered_by,
                 'window_minutes' => $log->window_minutes,
                 'inserted_count' => $log->inserted_count,
-                'status'         => $log->status,
-                'error_message'  => $log->error_message,
-                'started_at'     => optional($log->started_at)->toDateTimeString(),
-                'finished_at'    => optional($log->finished_at)->toDateTimeString(),
-                'duration_sec'   => $log->started_at && $log->finished_at
+                'status' => $log->status,
+                'error_message' => $log->error_message,
+                'started_at' => optional($log->started_at)->toDateTimeString(),
+                'finished_at' => optional($log->finished_at)->toDateTimeString(),
+                'duration_sec' => $log->started_at && $log->finished_at
                     ? $log->finished_at->diffInSeconds($log->started_at)
                     : null,
             ];
@@ -50,18 +50,18 @@ class SyncController
 
         // return Inertia::render('Attendance/Sync/Index');
         return Inertia::render('Attendance/Sync/Index', [
-            'logs'      => $logs,
-            'lastSync'  => $lastSync ? [
-                'status'         => $lastSync->status,
+            'logs' => $logs,
+            'lastSync' => $lastSync ? [
+                'status' => $lastSync->status,
                 'inserted_count' => $lastSync->inserted_count,
-                'started_at'     => optional($lastSync->started_at)->toDateTimeString(),
-                'finished_at'    => optional($lastSync->finished_at)->toDateTimeString(),
+                'started_at' => optional($lastSync->started_at)->toDateTimeString(),
+                'finished_at' => optional($lastSync->finished_at)->toDateTimeString(),
                 'window_minutes' => $lastSync->window_minutes,
             ] : null,
             'defaultWindow' => 15,
-            'cronInfo'      => $cronInfo,
+            'cronInfo' => $cronInfo,
             // 'canRunSync'    => $request->user()?->can('attendance.sync.run') ?? false,
-            'canRunSync'    => true,
+            'canRunSync' => true,
         ]);
     }
 
@@ -88,7 +88,7 @@ class SyncController
             $logger->error($e);
             report($e);
 
-            return back()->with('error', 'Error durante la sincronización: ' . $e->getMessage());
+            return back()->with('error', 'Error durante la sincronización: '.$e->getMessage());
         }
     }
 }

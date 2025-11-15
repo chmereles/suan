@@ -4,15 +4,16 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('suan_daily_summary', function (Blueprint $table) {
             $table->id();
 
             $table->foreignId('employee_id')
-                  ->constrained('suan_employees')
-                  ->cascadeOnDelete();
+                ->constrained('suan_employees')
+                ->cascadeOnDelete();
 
             $table->date('date')->index();
 
@@ -22,7 +23,7 @@ return new class extends Migration {
                 'absent_justified',
                 'license',
                 'holiday',
-                'anomaly'
+                'anomaly',
             ])->default('present');
 
             $table->integer('total_worked_minutes')->unsigned()->default(0);

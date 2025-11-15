@@ -38,24 +38,22 @@ class SuanAttendanceRecord extends Model
     ];
 
     protected $casts = [
-        'date'                 => 'date',
-        'check_in'             => 'datetime',
-        'check_out'            => 'datetime',
-        'worked_minutes'       => 'integer',
-        'late_minutes'         => 'integer',
-        'early_leave_minutes'  => 'integer',
-        'metadata'             => 'array',
+        'date' => 'date',
+        'check_in' => 'datetime',
+        'check_out' => 'datetime',
+        'worked_minutes' => 'integer',
+        'late_minutes' => 'integer',
+        'early_leave_minutes' => 'integer',
+        'metadata' => 'array',
     ];
 
     /** Relaciones */
-
     public function employee(): BelongsTo
     {
         return $this->belongsTo(SuanEmployee::class, 'employee_id');
     }
 
     /** Scopes */
-
     public function scopeForDate($query, $date)
     {
         return $query->where('date', $date);

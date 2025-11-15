@@ -20,11 +20,11 @@ class AttendanceSyncLogger
     public function start(?int $windowMinutes = null): AttendanceSyncLog
     {
         $this->log = AttendanceSyncLog::create([
-            'source'         => $this->source,
-            'triggered_by'   => $this->triggeredBy,
+            'source' => $this->source,
+            'triggered_by' => $this->triggeredBy,
             'window_minutes' => $windowMinutes,
-            'status'         => 'running',
-            'started_at'     => now(),
+            'status' => 'running',
+            'started_at' => now(),
         ]);
 
         return $this->log;
@@ -37,8 +37,8 @@ class AttendanceSyncLogger
     {
         $this->log->update([
             'inserted_count' => $inserted,
-            'finished_at'    => now(),
-            'status'         => 'success',
+            'finished_at' => now(),
+            'status' => 'success',
         ]);
     }
 
@@ -48,8 +48,8 @@ class AttendanceSyncLogger
     public function error(Throwable $e): void
     {
         $this->log->update([
-            'finished_at'   => now(),
-            'status'        => 'failed',
+            'finished_at' => now(),
+            'status' => 'failed',
             'error_message' => $e->getMessage(),
         ]);
     }

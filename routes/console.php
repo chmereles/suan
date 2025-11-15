@@ -9,6 +9,6 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('attendance:sync-crosschex')
-        ->everyTenMinutes()
-        ->withoutOverlapping()
-        ->onOneServer(); // si algún día tenés varios nodos
+    ->everyTenMinutes()
+    ->withoutOverlapping()
+    ->onOneServer(); // si algún día tenés varios nodos

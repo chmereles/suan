@@ -32,19 +32,17 @@ class SuanAnomaly extends Model
     ];
 
     protected $casts = [
-        'date'     => 'date',
+        'date' => 'date',
         'resolved' => 'boolean',
     ];
 
     /** Relaciones */
-
     public function employee(): BelongsTo
     {
         return $this->belongsTo(SuanEmployee::class, 'employee_id');
     }
 
     /** Scopes */
-
     public function scopeUnresolved($query)
     {
         return $query->where('resolved', false);

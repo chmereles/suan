@@ -4,8 +4,8 @@ namespace App\Console\Commands;
 
 use App\Domain\Attendance\Actions\SyncCrossChexLogsAction;
 use App\Domain\Attendance\Services\AttendanceSyncLogger;
-use Illuminate\Console\Command;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
 
 class SyncCrossChexInitialCommand extends Command
 {
@@ -18,15 +18,15 @@ class SyncCrossChexInitialCommand extends Command
     public function handle(SyncCrossChexLogsAction $action): int
     {
         $start = Carbon::parse($this->argument('start'))->startOfMonth();
-        $end   = Carbon::parse($this->argument('end'))->endOfMonth();
+        $end = Carbon::parse($this->argument('end'))->endOfMonth();
 
         $this->info("Sincronización inicial desde {$start->toDateString()} a {$end->toDateString()}");
 
         while ($start->lte($end)) {
             $batchStart = $start->clone()->startOfMonth();
-            $batchEnd   = $start->clone()->endOfMonth();
+            $batchEnd = $start->clone()->endOfMonth();
 
-            $this->info("Procesando mes: " . $batchStart->format('Y-m'));
+            $this->info('Procesando mes: '.$batchStart->format('Y-m'));
 
             $logger = new AttendanceSyncLogger('crosschex', 'initial');
             $logger->start(null);
@@ -46,7 +46,8 @@ class SyncCrossChexInitialCommand extends Command
             $start->addMonth();
         }
 
-        $this->info("Sincronización inicial finalizada.");
+        $this->info('Sincronización inicial finalizada.');
+
         return self::SUCCESS;
     }
 }
