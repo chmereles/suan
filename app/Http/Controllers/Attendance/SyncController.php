@@ -1,9 +1,10 @@
-<?php 
+<?php
 
 namespace App\Http\Controllers\Attendance;
 
 use App\Domain\Attendance\Actions\SyncCrossChexLogsAction;
 use App\Domain\Attendance\Models\AttendanceSyncLog;
+use App\Domain\Attendance\Services\AttendanceSyncLogger;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -64,37 +65,27 @@ class SyncController
         ]);
     }
 
-    public function run(Request $request, SyncCrossChexLogsAction $action)
-    {
+    public function run(
+        Request $request,
+        SyncCrossChexLogsAction $action
+    ) {
+        // Si usás autorización, mantenelo:
         // $this->authorize('attendance.sync.run');
 
         $window = $request->integer('window') ?: null;
 
-        $log = AttendanceSyncLog::create([
-            'source'         => 'crosschex',
-            'triggered_by'   => 'manual',
-            'window_minutes' => $window,
-            'status'         => 'running',
-            'started_at'     => now(),
-        ]);
+        $logger = new AttendanceSyncLogger('crosschex', 'manual');
+        $logger->start($window);
 
         try {
-            $inserted = $action($window); // tu Action actual, sin cambios
+            $inserted = $action($window);
 
-            $log->update([
-                'inserted_count' => $inserted,
-                'finished_at'    => now(),
-                'status'         => 'success',
-            ]);
+            $logger->success($inserted);
 
             return back()->with('success', "Sincronización completada. Registros nuevos: {$inserted}");
         } catch (\Throwable $e) {
-            $log->update([
-                'finished_at'   => now(),
-                'status'        => 'failed',
-                'error_message' => $e->getMessage(),
-            ]);
 
+            $logger->error($e);
             report($e);
 
             return back()->with('error', 'Error durante la sincronización: ' . $e->getMessage());
