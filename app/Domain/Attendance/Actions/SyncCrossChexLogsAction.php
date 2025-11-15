@@ -1,60 +1,50 @@
-<?php 
-// app/Domain/Attendance/Actions/SyncCrossChexLogsAction.php
+<?php
 
 namespace App\Domain\Attendance\Actions;
 
-use App\Domain\Attendance\Models\CrossChexLog;
 use App\Infrastructure\Attendance\CrossChex\CrossChexClient;
-use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class SyncCrossChexLogsAction
 {
     public function __construct(
         private readonly CrossChexClient $client,
-    ) {
-    }
+        private readonly \App\Domain\Attendance\Services\CrossChexMapper $mapper,
+        private readonly \App\Domain\Attendance\Repositories\AttendanceRepository $repo,
+    ) {}
 
+    /**
+     * Ejecutar sync sobre una ventana de minutos
+     */
     public function __invoke(?int $windowMinutes = null): int
     {
-        $windowMinutes ??= (int) config('crosschex.sync_window_minutes', 60);
+        [$start, $end] = $this->resolveWindow($windowMinutes);
 
-        $end   = now();
-        $begin = $end->clone()->subMinutes($windowMinutes);
+        return $this->syncRange($start, $end);
+    }
 
-        $token   = $this->client->getToken();
-        $records = $this->client->getRecords(
-            token: $token,
-            beginIso: $begin->toIso8601String(),
-            endIso: $end->toIso8601String(),
-        );
+    /**
+     * Sincronizar entre rango arbitrario (ideal para inicial)
+     */
+    public function syncRange(Carbon $start, Carbon $end): int
+    {
+        $records = $clientRecords = $this->client->getAllRecords($start, $end);
 
-        $inserted = 0;
+        $mapped = $this->mapper->mapRecords($records);
 
-        DB::transaction(function () use ($records, &$inserted) {
-            foreach ($records as $record) {
-                $uuid = $record['uuid'] ?? null;
+        return $this->repo->storeMany($mapped);
+    }
 
-                if (! $uuid) {
-                    continue;
-                }
+    /**
+     * Determinar ventana por minutos
+     */
+    private function resolveWindow(?int $windowMinutes): array
+    {
+        $end = now();
+        $start = $windowMinutes
+            ? now()->clone()->subMinutes($windowMinutes)
+            : now()->clone()->subMinutes(15);
 
-                $created = CrossChexLog::firstOrCreate(
-                    ['uuid' => $uuid],
-                    [
-                        'employee_workno' => $record['employee']['workno'] ?? null,
-                        'checktype'       => $record['checktype'] ?? null,
-                        'checktime'       => $record['checktime'] ?? null,
-                        'device_serial'   => $record['device']['serial_number'] ?? null,
-                        'raw'             => $record,
-                    ]
-                );
-
-                if ($created->wasRecentlyCreated) {
-                    $inserted++;
-                }
-            }
-        });
-
-        return $inserted;
+        return [$start, $end];
     }
 }
