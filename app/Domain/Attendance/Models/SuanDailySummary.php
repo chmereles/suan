@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $employee_id
  * @property \Carbon\Carbon $date
  * @property string $status
- * @property int $total_worked_minutes
+ * @property int $worked_minutes
  * @property bool $justified
  * @property string|null $notes
  */
@@ -26,14 +26,14 @@ class SuanDailySummary extends Model
         'employee_id',
         'date',
         'status',
-        'total_worked_minutes',
+        'worked_minutes',
         'justified',
         'notes',
     ];
 
     protected $casts = [
         'date' => 'date',
-        'total_worked_minutes' => 'integer',
+        'worked_minutes' => 'integer',
         'justified' => 'boolean',
     ];
 

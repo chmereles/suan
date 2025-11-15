@@ -34,4 +34,12 @@ class EloquentEmployeeRepository implements EmployeeRepositoryInterface
             $data
         );
     }
+
+    public function allMapped(): array
+    {
+        return SuanEmployee::whereNotNull('device_user_id')
+            ->orderBy('full_name')
+            ->get()
+            ->all();
+    }
 }

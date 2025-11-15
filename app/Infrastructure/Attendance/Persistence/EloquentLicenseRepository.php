@@ -4,6 +4,7 @@ namespace App\Infrastructure\Attendance\Persistence;
 
 use App\Domain\Attendance\Models\SuanLicense;
 use App\Domain\Attendance\Repositories\LicenseRepositoryInterface;
+use Carbon\CarbonInterface;
 
 class EloquentLicenseRepository implements LicenseRepositoryInterface
 {
@@ -23,5 +24,20 @@ class EloquentLicenseRepository implements LicenseRepositoryInterface
             ],
             $data
         );
+    }
+
+    public function hasLicenseForDate(int $employeeId, CarbonInterface $date): bool
+    {
+        return SuanLicense::where('employee_id', $employeeId)
+            ->whereDate('date', $date->toDateString())
+            ->exists();
+    }
+
+    public function getLicensesForDate(int $employeeId, CarbonInterface $date): array
+    {
+        return SuanLicense::where('employee_id', $employeeId)
+            ->whereDate('date', $date->toDateString())
+            ->get()
+            ->toArray();
     }
 }

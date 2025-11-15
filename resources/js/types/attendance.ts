@@ -21,7 +21,7 @@ export interface DailySummary {
   employee_id: number
   date: string
   status: AttendanceStatus
-  total_worked_minutes: number
+  worked_minutes: number
   justified: boolean
   notes?: string | null
 

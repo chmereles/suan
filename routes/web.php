@@ -21,13 +21,13 @@ Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-// Route::middleware(['auth', 'verified']) // y el middleware de rol que uses
-//     ->prefix('admin/attendance/sync')
-//     ->name('attendance.sync.')
-//     ->group(function () {
-//         Route::get('/', [SyncController::class, 'index'])->name('index');
-//         Route::post('/run', [SyncController::class, 'run'])->name('run');
-//     });
+Route::middleware(['auth', 'verified']) // y el middleware de rol que uses
+    ->prefix('admin/attendance/sync')
+    ->name('attendance.sync.')
+    ->group(function () {
+        Route::get('/', [SyncController::class, 'index'])->name('index');
+        Route::post('/run', [SyncController::class, 'run'])->name('run');
+    });
 
 // Route::middleware(['auth'])->group(function () {
 
@@ -79,11 +79,11 @@ Route::middleware(['auth'])->prefix('attendance')->group(function () {
     // --------------------------------------------------
     // Sync (CrossChex → SUAN)
     // --------------------------------------------------
-    Route::get('/sync', [SyncController::class, 'index'])
-        ->name('attendance.sync.index');
+    // Route::get('/sync', [SyncController::class, 'index'])
+    //     ->name('attendance.sync.index');
 
-    Route::post('/sync/run', [SyncController::class, 'run'])
-        ->name('attendance.sync.run');
+    // Route::post('/sync/run', [SyncController::class, 'run'])
+    //     ->name('attendance.sync.run');
 
     // --------------------------------------------------
     // Procesamiento de registros crudos → records

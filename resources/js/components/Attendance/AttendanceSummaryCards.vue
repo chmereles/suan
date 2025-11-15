@@ -27,7 +27,7 @@ const byStatus = computed(() => {
 
 const totalHours = computed(() => {
   const minutes = props.summaries.reduce(
-    (acc, s) => acc + (s.total_worked_minutes || 0),
+    (acc, s) => acc + (s.worked_minutes || 0),
     0
   )
   return (minutes / 60).toFixed(1)

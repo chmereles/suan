@@ -17,8 +17,7 @@ class AttendanceRecordProcessor
         Collection $logs,
         int $employeeId,
         string $date
-    ): array
-    {
+    ): array {
         if ($logs->isEmpty()) {
             return [];
         }
@@ -30,20 +29,27 @@ class AttendanceRecordProcessor
 
         foreach ($logs as $log) {
 
-            $recordedAt = Carbon::parse($log['recorded_at']);
+            $recordedAt = Carbon::parse($log->recorded_at);
+
+            $rawPayload = $log->raw_payload;
+
+            if (is_string($rawPayload)) {
+                $rawPayload = json_decode($rawPayload, true) ?? [];
+            }
 
             $results[] = new ProcessedRecordDTO(
                 employeeId: $employeeId,
                 date: $date,
                 type: $this->inferTimeSegment($recordedAt),   // mañana / tarde
                 recordedAt: $recordedAt->toDateTimeString(),
-                attendanceLogId: $log['id'] ?? null,
-                rawId: $log['raw_id'] ?? null,
-                rawPayload: $log['raw_payload'] ?? [],
+                attendanceLogId: $log->id ?? null,
+                rawId: $log->raw_id ?? null,
+                rawPayload: $rawPayload,
                 metadata: [
-                    'raw_index' => $log['raw_index'] ?? null,
-                    'source' => 'crosschex',
-                    'order' => $recordedAt->format('H:i:s'),
+                    'raw_id'       => $log->raw_id ?? null,
+                    'device'       => $log->device_serial ?? null,
+                    'record_type'  => $log->record_type ?? null,
+                    'raw_payload'  => $log->raw_payload ?? null,
                 ],
             );
         }

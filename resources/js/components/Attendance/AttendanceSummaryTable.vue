@@ -14,7 +14,7 @@ const rows = computed(() =>
     nombre: s.employee?.full_name ?? '—',
     area: s.employee?.area ?? '—',
     status: s.status,
-    worked: s.total_worked_minutes,
+    worked: s.worked_minutes,
     justified: s.justified,
     notes: s.notes,
   }))

@@ -38,6 +38,7 @@ class SuanEmployee extends Model
         'synced_at' => 'datetime',
     ];
 
+
     /** Relaciones */
     public function attendanceRecords(): HasMany
     {

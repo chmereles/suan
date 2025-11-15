@@ -14,21 +14,14 @@ class EloquentDailySummaryRepository implements DailySummaryRepositoryInterface
             ->first();
     }
 
-    public function createOrUpdate(array $data): SuanDailySummary
+    public function storeOrUpdate(int $employeeId, string $date, array $data): SuanDailySummary
     {
         return SuanDailySummary::updateOrCreate(
             [
-                'employee_id' => $data['employee_id'],
-                'date' => $data['date'],
+                'employee_id' => $employeeId,
+                'date' => $date,
             ],
             $data
         );
-    }
-
-    public function forRange(string $from, string $to): iterable
-    {
-        return SuanDailySummary::with('employee')
-            ->whereBetween('date', [$from, $to])
-            ->get();
     }
 }

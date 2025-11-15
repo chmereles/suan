@@ -28,7 +28,7 @@ class ProcessAttendanceRecordsAction
 
         // 2 — Tomar logs crudos de ese día
         $logs = collect(
-            $this->logRepo->forEmployeeAndDate($deviceUserId, $date)
+            $this->logRepo->getByDeviceUserAndDate($deviceUserId, $date)
         );
 
         // 3 — Eliminar registros procesados previos

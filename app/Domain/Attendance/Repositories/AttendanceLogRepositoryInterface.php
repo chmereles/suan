@@ -2,22 +2,18 @@
 
 namespace App\Domain\Attendance\Repositories;
 
-use Carbon\CarbonInterface;
+use Illuminate\Support\Collection;
 
 interface AttendanceLogRepositoryInterface
 {
     /**
-     * Devuelve todos los logs crudos de un empleado y una fecha.
-     *
-     * Cada elemento del array debe tener como mínimo:
-     * - id
-     * - recorded_at
-     * - raw_id
-     * - raw_payload
-     *
-     * @param string|int $deviceUserId
-     * @param string     $date Y-m-d
-     * @return array
+     * Devuelve todos los logs crudos de CrossChex
+     * para un device_user_id en una fecha específica.
      */
-    public function forEmployeeAndDate(string|int $deviceUserId, string $date): array;
+    public function getByDeviceUserAndDate(string $deviceUserId, string $date): Collection;
+
+    /**
+     * Logs en un rango de fechas.
+     */
+    public function getRange(string $from, string $to): Collection;
 }
