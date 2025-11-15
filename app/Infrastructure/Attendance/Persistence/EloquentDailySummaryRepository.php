@@ -27,6 +27,8 @@ class EloquentDailySummaryRepository implements DailySummaryRepositoryInterface
 
     public function forRange(string $from, string $to): iterable
     {
-        return SuanDailySummary::whereBetween('date', [$from, $to])->get();
+        return SuanDailySummary::with('employee')
+            ->whereBetween('date', [$from, $to])
+            ->get();
     }
 }

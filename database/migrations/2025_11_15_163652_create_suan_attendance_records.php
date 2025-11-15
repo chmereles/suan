@@ -29,7 +29,7 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->unique(['employee_id', 'date'], 'unique_employee_date');
+            // $table->unique(['employee_id', 'date'], 'unique_employee_date');
         });
     }
 
