@@ -2,34 +2,43 @@
 
 namespace App\Infrastructure\Attendance\Persistence;
 
-use App\Domain\Attendance\Models\SuanAttendanceRecord;
+use App\Domain\Attendance\DTO\ProcessedRecordDTO;
 use App\Domain\Attendance\Repositories\AttendanceRecordRepositoryInterface;
+use Illuminate\Support\Facades\DB;
 
 class EloquentAttendanceRecordRepository implements AttendanceRecordRepositoryInterface
 {
-    public function forEmployeeAndDate(int $employeeId, string $date): ?SuanAttendanceRecord
+    public function deleteByEmployeeAndDate(int $employeeId, string $date): void
     {
-        return SuanAttendanceRecord::where('employee_id', $employeeId)
+        DB::table('suan_attendance_records')
+            ->where('employee_id', $employeeId)
             ->where('date', $date)
-            ->first();
+            ->delete();
     }
 
-    public function create(array $data): SuanAttendanceRecord
+    public function store(ProcessedRecordDTO $dto): void
     {
-        return SuanAttendanceRecord::create($data);
+        DB::table('suan_attendance_records')->insert([
+            'employee_id'        => $dto->employeeId,
+            'date'               => $dto->date,
+            'type'               => $dto->type,
+            'recorded_at'        => $dto->recordedAt,
+            'attendance_log_id'  => $dto->attendanceLogId,
+            'raw_id'             => $dto->rawId,
+            'raw_payload'        => json_encode($dto->rawPayload),
+            'metadata'           => json_encode($dto->metadata),
+            'created_at'         => now(),
+            'updated_at'         => now(),
+        ]);
     }
 
-    public function update(SuanAttendanceRecord $record, array $data): SuanAttendanceRecord
+    public function getByEmployeeAndDate(int $employeeId, string $date): array
     {
-        $record->update($data);
-
-        return $record;
-    }
-
-    public function between(string $from, string $to, int $employeeId): iterable
-    {
-        return SuanAttendanceRecord::where('employee_id', $employeeId)
-            ->whereBetween('date', [$from, $to])
-            ->get();
+        return DB::table('suan_attendance_records')
+            ->where('employee_id', $employeeId)
+            ->where('date', $date)
+            ->orderBy('recorded_at')
+            ->get()
+            ->toArray();
     }
 }

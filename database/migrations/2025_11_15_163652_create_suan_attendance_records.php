@@ -9,27 +9,43 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('suan_attendance_records', function (Blueprint $table) {
+
             $table->id();
 
+            // Empleado
             $table->foreignId('employee_id')
                 ->constrained('suan_employees')
                 ->cascadeOnDelete();
 
+            // Fecha normalizada (solo yyyy-mm-dd)
             $table->date('date')->index();
 
-            $table->timestamp('check_in')->nullable();
-            $table->timestamp('check_out')->nullable();
+            // Timestamp real de la marcación (de CrossChex)
+            $table->timestamp('recorded_at')->index();
 
-            $table->integer('worked_minutes')->unsigned()->default(0);
-            $table->integer('late_minutes')->unsigned()->default(0);
-            $table->integer('early_leave_minutes')->unsigned()->default(0);
+            // Tipo interpretado por SUAN
+            // Ej: in_morning, out_morning, in_afternoon, out_afternoon
+            $table->string('type', 50)->nullable()->index();
 
-            $table->string('source', 50)->default('crosschex');
+            // Relación con attendance_logs (crudos)
+            $table->unsignedBigInteger('attendance_log_id')->nullable()->index();
+
+            // raw_id del registro original (CrossChex 'raw_id')
+            $table->string('raw_id')->nullable()->index();
+
+            // Payload crudo para auditoría
+            $table->json('raw_payload')->nullable();
+
+            // Metadata del procesamiento
             $table->json('metadata')->nullable();
 
             $table->timestamps();
 
-            // $table->unique(['employee_id', 'date'], 'unique_employee_date');
+            // Evitar duplicados exactos de marcación
+            $table->unique(
+                ['employee_id', 'recorded_at'],
+                'unique_employee_recorded_at'
+            );
         });
     }
 
