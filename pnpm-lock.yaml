@@ -20,6 +20,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      date-fns:
+        specifier: ^4.1.0
+        version: 4.1.0
       laravel-vite-plugin:
         specifier: ^2.0.0
         version: 2.0.1(vite@7.2.2(@types/node@22.19.1)(jiti@2.6.1)(lightningcss@1.30.2))
@@ -51,6 +54,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.11
         version: 4.1.17(vite@7.2.2(@types/node@22.19.1)(jiti@2.6.1)(lightningcss@1.30.2))
+      '@types/date-fns':
+        specifier: ^2.6.3
+        version: 2.6.3
       '@types/node':
         specifier: ^22.13.5
         version: 22.19.1
@@ -623,6 +629,10 @@ packages:
     peerDependencies:
       vue: ^2.7.0 || ^3.0.0
 
+  '@types/date-fns@2.6.3':
+    resolution: {integrity: sha512-Ke1lw2Ni1t/wMUoLtKFmSNCLozcTBd6vmMqFP4hRzXn6qzkNt97bPAX0x5Y/c15DP43kKvwW1ycStD5+43jVQA==}
+    deprecated: This is a stub types definition. date-fns provides its own type definitions, so you do not need this installed.
+
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
 
@@ -886,6 +896,9 @@ packages:
 
   csstype@3.2.0:
     resolution: {integrity: sha512-si++xzRAY9iPp60roQiFta7OFbhrgvcthrhlNAGeQptSY25uJjkfUV8OArC3KLocB8JT8ohz+qgxWCmz8RhjIg==}
+
+  date-fns@4.1.0:
+    resolution: {integrity: sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==}
 
   de-indent@1.0.2:
     resolution: {integrity: sha512-e/1zu3xH5MQryN2zdVaF0OrdNLUbvWxzMbi+iNA6Bky7l1RoP8a2fIbRocyHclXt/arDrrR6lL3TqFD9pMQTsg==}
@@ -2139,6 +2152,10 @@ snapshots:
       '@tanstack/virtual-core': 3.13.12
       vue: 3.5.24(typescript@5.9.3)
 
+  '@types/date-fns@2.6.3':
+    dependencies:
+      date-fns: 4.1.0
+
   '@types/estree@1.0.8': {}
 
   '@types/json-schema@7.0.15': {}
@@ -2481,6 +2498,8 @@ snapshots:
   cssesc@3.0.0: {}
 
   csstype@3.2.0: {}
+
+  date-fns@4.1.0: {}
 
   de-indent@1.0.2: {}
 

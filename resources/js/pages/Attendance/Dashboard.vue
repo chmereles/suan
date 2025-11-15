@@ -1,48 +1,48 @@
-<!-- resources/js/Pages/Attendance/Dashboard.vue -->
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import AppLayout from '@/layouts/AppLayout.vue'
+import { ref } from 'vue'
+import { router } from '@inertiajs/vue3'
+import { format, parseISO } from 'date-fns'
+import { es } from 'date-fns/locale'
+import type { DailySummary } from '@/types/attendance'
 import DateFilterBar from '@/components/Attendance/DateFilterBar.vue'
 import AttendanceSummaryCards from '@/components/Attendance/AttendanceSummaryCards.vue'
 import AttendanceSummaryTable from '@/components/Attendance/AttendanceSummaryTable.vue'
-import type { DailySummary } from '@/types/attendance'
+import AppLayout from '@/layouts/AppLayout.vue'
 
-const summaries = ref<DailySummary[]>([])
-const selectedDate = ref<string>(new Date().toISOString().slice(0, 10))
-const loading = ref(false)
-const errorMessage = ref<string | null>(null)
+// ---------------------------------------------
+// PROPS con tipado limpio y reutilizable
+// ---------------------------------------------
+const props = defineProps<{
+  date: string
+  summaries: DailySummary[]
+}>()
 
-const loadSummary = async () => {
-  try {
-    loading.value = true
-    errorMessage.value = null
+// Date local
+const selectedDate = ref(props.date)
 
-    const resp = await fetch(`/api/suan/attendance/summary?date=${selectedDate.value}`, {
-      headers: { Accept: 'application/json' },
-    })
-
-    if (!resp.ok) {
-      throw new Error(`Error HTTP ${resp.status}`)
+function changeDate() {
+  router.get(
+    '/attendance',
+    { date: selectedDate.value },
+    {
+      preserveState: true,
+      preserveScroll: true,
     }
-
-    const data = await resp.json()
-    summaries.value = data.summaries ?? []
-  } catch (error: any) {
-    console.error(error)
-    errorMessage.value = 'No se pudo cargar la información de asistencia.'
-  } finally {
-    loading.value = false
-  }
+  )
 }
 
-onMounted(() => {
-  loadSummary()
-})
+function formatMinutes(min: number | null) {
+  if (!min) return '0 h'
+  const h = Math.floor(min / 60)
+  const m = min % 60
+  return `${h} h ${m} min`
+}
 
-watch(selectedDate, () => {
-  loadSummary()
-})
+function formatDate(d: string) {
+  return format(parseISO(d), "dd 'de' MMMM yyyy", { locale: es })
+}
 </script>
+
 
 <template>
   <AppLayout title="Asistencia diaria">
@@ -60,25 +60,21 @@ watch(selectedDate, () => {
       </div>
 
       <!-- Filtros -->
-      <DateFilterBar
-        v-model="selectedDate"
-        :loading="loading"
-        @refresh="loadSummary"
-      />
+      <DateFilterBar v-model="selectedDate" @update:modelValue="changeDate" />
+
 
       <!-- Mensaje de error -->
-      <div
-        v-if="errorMessage"
-        class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-700/60 dark:bg-red-900/30 dark:text-red-100"
-      >
-        {{ errorMessage }}
+      <div v-if="Object.keys($page.props.errors).length">
+        <p class="text-red-500">
+          {{ $page.props.errors }}
+        </p>
       </div>
 
       <!-- Resumen -->
       <AttendanceSummaryCards :summaries="summaries" />
 
       <!-- Tabla -->
-      <AttendanceSummaryTable :summaries="summaries" :loading="loading" />
+      <AttendanceSummaryTable :summaries="summaries" />
     </div>
   </AppLayout>
 </template>

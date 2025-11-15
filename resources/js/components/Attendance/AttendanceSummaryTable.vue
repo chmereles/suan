@@ -5,7 +5,6 @@ import type { DailySummary } from '@/types/attendance'
 
 const props = defineProps<{
   summaries: DailySummary[]
-  loading?: boolean
 }>()
 
 const rows = computed(() =>
@@ -75,13 +74,13 @@ const statusClass = (status: string) => {
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:bg-gray-900/40">
-          <tr v-if="loading">
+          <!-- <tr v-if="loading">
             <td colspan="7" class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
               Cargando información...
             </td>
-          </tr>
+          </tr> -->
 
-          <tr v-else-if="rows.length === 0">
+          <tr v-if="rows.length === 0">
             <td colspan="7" class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
               No hay registros para la fecha seleccionada.
             </td>

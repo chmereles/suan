@@ -64,7 +64,16 @@ Route::middleware(['auth'])->prefix('attendance')->group(function () {
     // Dashboard principal
     // --------------------------------------------------
     Route::get('/', function () {
-        return inertia('Attendance/Dashboard');
+        $date = request('date', now()->toDateString());
+
+        $summaries = app(
+            \App\Domain\Attendance\Repositories\DailySummaryRepositoryInterface::class
+        )->forRange($date, $date);
+
+        return inertia('Attendance/Dashboard', [
+            'date'      => $date,
+            'summaries' => $summaries,
+        ]);
     })->name('attendance.dashboard');
 
     // --------------------------------------------------
@@ -102,7 +111,6 @@ Route::middleware(['auth'])->prefix('attendance')->group(function () {
 
     Route::post('/employees/map-device', [EmployeesController::class, 'mapDeviceUserId'])
         ->name('attendance.employees.map-device');
-
 });
 
 require __DIR__ . '/settings.php';
