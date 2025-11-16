@@ -2,6 +2,7 @@
 
 use App\Domain\Attendance\Repositories\DailySummaryRepositoryInterface;
 use App\Http\Controllers\Attendance\AttendanceController;
+use App\Http\Controllers\Attendance\ContextEventController;
 use App\Http\Controllers\Attendance\DailySummaryController;
 use App\Http\Controllers\Attendance\EmployeesController;
 use App\Http\Controllers\Attendance\SyncController;
@@ -71,6 +72,14 @@ Route::middleware(['auth'])->prefix('attendance')->group(function () {
 
     Route::post('/employees/map-device', [EmployeesController::class, 'mapDeviceUserId'])
         ->name('attendance.employees.map-device');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/attendance/context-event/create', [ContextEventController::class, 'create'])
+        ->name('attendance.context-event.create');
+
+    Route::post('/attendance/context-event', [ContextEventController::class, 'store'])
+        ->name('attendance.context-event.store');
 });
 
 require __DIR__.'/settings.php';

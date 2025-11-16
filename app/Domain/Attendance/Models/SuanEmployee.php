@@ -56,7 +56,7 @@ class SuanEmployee extends Model
 
     public function manualNotes(): HasMany
     {
-        return $this->hasMany(SuanManualNote::class, 'employee_id');
+        return $this->hasMany(SuanContextEvent::class, 'employee_id');
     }
 
     public function anomalies(): HasMany
