@@ -10,10 +10,9 @@ class AnomalyDetectorService
     /**
      * Detecta anomalías en las marcas procesadas de un día.
      *
-     * @param  array|Collection  $records   Registros procesados (suan_attendance_records)
-     * @param  int               $employeeId
-     * @param  string            $date      YYYY-MM-DD
-     * @return array                          Lista de anomalías detectadas
+     * @param  array|Collection  $records  Registros procesados (suan_attendance_records)
+     * @param  string  $date  YYYY-MM-DD
+     * @return array Lista de anomalías detectadas
      */
     public function detect(array|Collection $records, int $employeeId, string $date): array
     {
@@ -26,6 +25,7 @@ class AnomalyDetectorService
         // ------------------------------------------------------------------
         if ($records->isEmpty()) {
             $anomalies[] = ['type' => 'no_marks', 'message' => 'No se registraron fichadas.'];
+
             return $anomalies;
         }
 
@@ -38,7 +38,7 @@ class AnomalyDetectorService
         if ($records->count() === 1) {
             $anomalies[] = [
                 'type' => 'single_mark',
-                'message' => 'Solo se registró una marca (entrada o salida).'
+                'message' => 'Solo se registró una marca (entrada o salida).',
             ];
         }
 
@@ -54,7 +54,7 @@ class AnomalyDetectorService
                 'type' => 'duplicate_marks',
                 'timestamp' => $ts,
                 'count' => $group->count(),
-                'message' => "Se detectaron {$group->count()} marcas duplicadas en $ts."
+                'message' => "Se detectaron {$group->count()} marcas duplicadas en $ts.",
             ];
         }
 
@@ -73,7 +73,7 @@ class AnomalyDetectorService
                 $anomalies[] = [
                     'type' => 'out_of_order',
                     'timestamp' => $curr->toDateTimeString(),
-                    'message' => 'Las fichadas no están en orden cronológico.'
+                    'message' => 'Las fichadas no están en orden cronológico.',
                 ];
             }
         }
@@ -103,7 +103,7 @@ class AnomalyDetectorService
         $last = Carbon::parse($records->last()->recorded_at);
 
         // Ejemplo: si la jornada termina a las 13:00
-        $expectedExit = Carbon::parse($date . ' 13:00:00');
+        $expectedExit = Carbon::parse($date.' 13:00:00');
 
         if ($last->lessThan($expectedExit) && $records->count() >= 1) {
             $anomalies[] = [

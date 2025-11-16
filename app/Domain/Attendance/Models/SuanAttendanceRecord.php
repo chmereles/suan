@@ -2,17 +2,17 @@
 
 namespace App\Domain\Attendance\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 /**
- * @property int         $employee_id
- * @property string      $date
+ * @property int $employee_id
+ * @property string $date
  * @property string|null $check_in
  * @property string|null $check_out
- * @property int         $worked_minutes
- * @property int         $late_minutes
- * @property int         $early_leave_minutes
+ * @property int $worked_minutes
+ * @property int $late_minutes
+ * @property int $early_leave_minutes
  */
 class SuanAttendanceRecord extends Model
 {

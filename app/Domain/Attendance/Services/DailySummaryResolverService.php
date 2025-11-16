@@ -3,10 +3,9 @@
 namespace App\Domain\Attendance\Services;
 
 use App\Domain\Attendance\Repositories\AttendanceRecordRepositoryInterface;
+use App\Domain\Attendance\Repositories\ContextEventRepositoryInterface;
 use App\Domain\Attendance\Repositories\DailySummaryRepositoryInterface;
 use App\Domain\Attendance\Repositories\LicenseRepositoryInterface;
-use App\Domain\Attendance\Repositories\ContextEventRepositoryInterface;
-use App\Domain\Attendance\Services\AnomalyDetectorService;
 use Carbon\Carbon;
 
 class DailySummaryResolverService
@@ -22,8 +21,7 @@ class DailySummaryResolverService
     /**
      * Resuelve el estado final del día para un empleado.
      *
-     * @param int    $employeeId
-     * @param string $date (YYYY-MM-DD)
+     * @param  string  $date  (YYYY-MM-DD)
      */
     public function resolve(int $employeeId, string $date)
     {
@@ -72,7 +70,7 @@ class DailySummaryResolverService
         // -----------------------------------------------------
         // 6) Procesar check-in / check-out reales
         // -----------------------------------------------------
-        $checkIn  = Carbon::parse($records[0]->recorded_at);
+        $checkIn = Carbon::parse($records[0]->recorded_at);
         $checkOut = isset($records[count($records) - 1])
             ? Carbon::parse($records[count($records) - 1]->recorded_at)
             : null;
@@ -115,10 +113,10 @@ class DailySummaryResolverService
         ]);
     }
 
-
     private function calculateLateMinutes(Carbon $checkIn): int
     {
         $start = Carbon::parse($checkIn->toDateString().' 07:00:00');
+
         return $checkIn->greaterThan($start)
             ? $start->diffInMinutes($checkIn)
             : 0;
@@ -131,6 +129,7 @@ class DailySummaryResolverService
         }
 
         $end = Carbon::parse($checkOut->toDateString().' 13:00:00');
+
         return $checkOut->lessThan($end)
             ? $end->diffInMinutes($checkOut)
             : 0;

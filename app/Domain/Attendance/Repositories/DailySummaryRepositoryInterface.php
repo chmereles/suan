@@ -13,10 +13,6 @@ interface DailySummaryRepositoryInterface
 
     /**
      * Crea o actualiza un resumen diario.
-     *
-     * @param int    $employeeId
-     * @param string $date
-     * @param array  $data
      */
     public function storeOrUpdate(int $employeeId, string $date, array $data): SuanDailySummary;
 

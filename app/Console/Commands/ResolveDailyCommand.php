@@ -2,14 +2,15 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Domain\Attendance\Repositories\EmployeeRepositoryInterface;
 use App\Domain\Attendance\Actions\ProcessAttendanceRecordsAction;
 use App\Domain\Attendance\Actions\ResolveDailySummaryAction;
+use App\Domain\Attendance\Repositories\EmployeeRepositoryInterface;
+use Illuminate\Console\Command;
 
 class ResolveDailyCommand extends Command
 {
     protected $signature = 'suan:resolve-daily {--date=}';
+
     protected $description = 'Procesa y resuelve la asistencia completa de un día (attendance + summary)';
 
     public function __construct(
@@ -46,7 +47,7 @@ class ResolveDailyCommand extends Command
             $this->resolveSummary->execute($employee->id, $date);
         }
 
-        $this->info("✔ Día procesado correctamente.");
+        $this->info('✔ Día procesado correctamente.');
 
         return Command::SUCCESS;
     }

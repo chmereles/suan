@@ -35,5 +35,6 @@ export interface DailySummary {
   has_context_event: boolean
   anomalies: any[] | null
   notes: string | null
+  employee: Employee
 }
 

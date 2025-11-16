@@ -46,17 +46,16 @@ class AttendanceRecordProcessor
                 rawId: $log->raw_id ?? null,
                 rawPayload: $rawPayload,
                 metadata: [
-                    'raw_id'       => $log->raw_id ?? null,
-                    'device'       => $log->device_serial ?? null,
-                    'record_type'  => $log->record_type ?? null,
-                    'raw_payload'  => $log->raw_payload ?? null,
+                    'raw_id' => $log->raw_id ?? null,
+                    'device' => $log->device_serial ?? null,
+                    'record_type' => $log->record_type ?? null,
+                    'raw_payload' => $log->raw_payload ?? null,
                 ],
             );
         }
 
         return $results;
     }
-
 
     /**
      * Clasifica una marca según hora (mañana/tarde).

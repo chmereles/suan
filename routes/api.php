@@ -1,13 +1,11 @@
 <?php
 
+use App\Http\Controllers\Attendance\AttendanceController;
+use App\Http\Controllers\Attendance\DailySummaryController;
+use App\Http\Controllers\Attendance\EmployeesController;
+use App\Http\Controllers\Attendance\SyncController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Attendance\{
-    SyncController,
-    AttendanceController,
-    DailySummaryController,
-    EmployeesController
-};
 
 Route::get('/user', function (Request $request) {
     return $request->user();

@@ -1,16 +1,13 @@
 <?php
 
 use App\Domain\Attendance\Repositories\DailySummaryRepositoryInterface;
+use App\Http\Controllers\Attendance\AttendanceController;
+use App\Http\Controllers\Attendance\DailySummaryController;
+use App\Http\Controllers\Attendance\EmployeesController;
+use App\Http\Controllers\Attendance\SyncController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
-use App\Http\Controllers\Attendance\{
-    SyncController,
-    AttendanceController,
-    DailySummaryController,
-    EmployeesController
-};
-
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -48,7 +45,7 @@ Route::middleware(['auth'])->prefix('attendance')->group(function () {
     //     ]);
     // })->name('attendance.dashboard');
 
-        // --------------------------------------------------
+    // --------------------------------------------------
     // Resumen diario consolidado
     // --------------------------------------------------
     Route::get('/', [DailySummaryController::class, 'index'])
@@ -76,5 +73,5 @@ Route::middleware(['auth'])->prefix('attendance')->group(function () {
         ->name('attendance.employees.map-device');
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/admin/attendance.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/admin/attendance.php';

@@ -3,20 +3,20 @@
 namespace App\Providers;
 
 use App\Domain\Attendance\Repositories\AnomalyRepositoryInterface;
+use App\Domain\Attendance\Repositories\AttendanceLogRepositoryInterface;
 use App\Domain\Attendance\Repositories\AttendanceRecordRepositoryInterface;
 use App\Domain\Attendance\Repositories\ContextEventRepositoryInterface;
 use App\Domain\Attendance\Repositories\DailySummaryRepositoryInterface;
 use App\Domain\Attendance\Repositories\EmployeeRepositoryInterface;
 use App\Domain\Attendance\Repositories\LicenseRepositoryInterface;
 use App\Domain\Attendance\Repositories\ManualNoteRepositoryInterface;
-use App\Domain\Attendance\Repositories\AttendanceLogRepositoryInterface;
 use App\Infrastructure\Attendance\Persistence\EloquentAnomalyRepository;
+use App\Infrastructure\Attendance\Persistence\EloquentAttendanceLogRepository;
 use App\Infrastructure\Attendance\Persistence\EloquentAttendanceRecordRepository;
 use App\Infrastructure\Attendance\Persistence\EloquentDailySummaryRepository;
 use App\Infrastructure\Attendance\Persistence\EloquentEmployeeRepository;
 use App\Infrastructure\Attendance\Persistence\EloquentLicenseRepository;
 use App\Infrastructure\Attendance\Persistence\EloquentManualNoteRepository;
-use App\Infrastructure\Attendance\Persistence\EloquentAttendanceLogRepository;
 use App\Infrastructure\Attendance\Persistence\NullContextEventRepository;
 use Illuminate\Support\ServiceProvider;
 

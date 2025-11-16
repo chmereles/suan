@@ -6,7 +6,6 @@ use App\Domain\Attendance\Repositories\AttendanceLogRepositoryInterface;
 use App\Domain\Attendance\Repositories\AttendanceRecordRepositoryInterface;
 use App\Domain\Attendance\Repositories\EmployeeRepositoryInterface;
 use App\Domain\Attendance\Services\AttendanceRecordProcessor;
-use Carbon\Carbon;
 
 class ProcessAttendanceRecordsAction
 {

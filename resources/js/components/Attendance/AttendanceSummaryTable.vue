@@ -2,6 +2,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { DailySummary } from '@/types/attendance'
+import EmployeeRow from './EmployeeRow.vue';
 
 const props = defineProps<{
   summaries: DailySummary[]
@@ -15,7 +16,7 @@ const rows = computed(() =>
     area: s.employee?.area ?? '—',
     status: s.status,
     worked: s.worked_minutes,
-    justified: s.justified,
+    justified: s.has_context_event || s.has_license, // ajuste realista
     notes: s.notes,
   }))
 )
@@ -24,6 +25,7 @@ const statusLabel: Record<string, string> = {
   present: 'Presente',
   absent_unjustified: 'Ausencia injustificada',
   absent_justified: 'Ausencia justificada',
+  partial: 'Jornada parcial',
   license: 'Licencia',
   holiday: 'Feriado',
   anomaly: 'Anomalía',
@@ -86,7 +88,8 @@ const statusClass = (status: string) => {
             </td>
           </tr>
 
-          <tr v-for="row in rows" :key="row.id" class="hover:bg-gray-50/60 dark:hover:bg-gray-800/60">
+          <EmployeeRow v-for="s in summaries" :key="s.id" :summary="s" />
+          <!-- <tr v-for="row in rows" :key="row.id" class="hover:bg-gray-50/60 dark:hover:bg-gray-800/60">
             <td class="whitespace-nowrap px-4 py-2 text-gray-800 dark:text-gray-100">
               {{ row.legajo }}
             </td>
@@ -124,7 +127,7 @@ const statusClass = (status: string) => {
             <td class="px-4 py-2 text-xs text-gray-600 dark:text-gray-300">
               {{ row.notes || '—' }}
             </td>
-          </tr>
+          </tr> -->
         </tbody>
       </table>
     </div>

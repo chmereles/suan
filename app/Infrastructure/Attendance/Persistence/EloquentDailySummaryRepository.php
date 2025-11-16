@@ -24,6 +24,7 @@ class EloquentDailySummaryRepository implements DailySummaryRepositoryInterface
             $data
         );
     }
+
     public function getByDate(string $date): array
     {
         return SuanDailySummary::query()
