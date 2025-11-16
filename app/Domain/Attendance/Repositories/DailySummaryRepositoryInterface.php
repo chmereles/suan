@@ -19,4 +19,10 @@ interface DailySummaryRepositoryInterface
      * @param array  $data
      */
     public function storeOrUpdate(int $employeeId, string $date, array $data): SuanDailySummary;
+
+    /**
+     * Devuelve todos los resúmenes diarios de una fecha,
+     * generalmente para mostrarlos en el dashboard.
+     */
+    public function getByDate(string $date): array;
 }

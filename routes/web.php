@@ -1,5 +1,6 @@
 <?php
 
+use App\Domain\Attendance\Repositories\DailySummaryRepositoryInterface;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -29,61 +30,32 @@ Route::middleware(['auth', 'verified']) // y el middleware de rol que uses
         Route::post('/run', [SyncController::class, 'run'])->name('run');
     });
 
-// Route::middleware(['auth'])->group(function () {
-
-//     Route::prefix('attendance')->group(function () {
-
-//         // Dashboard principal
-//         Route::get('/', function () {
-//             return Inertia::render('Attendance/Dashboard');
-//         })->name('attendance.dashboard');
-
-//         // Sincronización
-//         // Route::get('/sync', SyncController::class)
-//         Route::get('/attendance/sync', [SyncController::class, 'index'])
-//             ->name('attendance.sync.web');
-
-//         // Procesados
-//         Route::get('/records', [AttendanceController::class, 'index'])
-//             ->name('attendance.records.web');
-
-//         // Consolidados
-//         Route::get('/summary', [DailySummaryController::class, 'index'])
-//             ->name('attendance.summary.web');
-
-//         // Empleados
-//         Route::get('/employees', [EmployeesController::class, 'index'])
-//             ->name('attendance.employees.web');
-//     });
-// });
-
-
 Route::middleware(['auth'])->prefix('attendance')->group(function () {
 
     // --------------------------------------------------
     // Dashboard principal
     // --------------------------------------------------
-    Route::get('/', function () {
-        $date = request('date', now()->toDateString());
+    // Route::get('/', function () {
+    //     $date = request('date', now()->toDateString());
 
-        $summaries = app(
-            \App\Domain\Attendance\Repositories\DailySummaryRepositoryInterface::class
-        )->forRange($date, $date);
+    //     $summaries = app(
+    //         DailySummaryRepositoryInterface::class
+    //     )->forRange($date, $date);
 
-        return inertia('Attendance/Dashboard', [
-            'date'      => $date,
-            'summaries' => $summaries,
-        ]);
-    })->name('attendance.dashboard');
+    //     return inertia('Attendance/Dashboard', [
+    //         'date'      => $date,
+    //         'summaries' => $summaries,
+    //     ]);
+    // })->name('attendance.dashboard');
 
+        // --------------------------------------------------
+    // Resumen diario consolidado
     // --------------------------------------------------
-    // Sync (CrossChex → SUAN)
-    // --------------------------------------------------
-    // Route::get('/sync', [SyncController::class, 'index'])
-    //     ->name('attendance.sync.index');
+    Route::get('/', [DailySummaryController::class, 'index'])
+        ->name('attendance.index');
 
-    // Route::post('/sync/run', [SyncController::class, 'run'])
-    //     ->name('attendance.sync.run');
+    Route::post('/summary/resolve', [DailySummaryController::class, 'resolve'])
+        ->name('attendance.summary.resolve');
 
     // --------------------------------------------------
     // Procesamiento de registros crudos → records
@@ -93,15 +65,6 @@ Route::middleware(['auth'])->prefix('attendance')->group(function () {
 
     Route::post('/records/process', [AttendanceController::class, 'process'])
         ->name('attendance.records.process');
-
-    // --------------------------------------------------
-    // Resumen diario consolidado
-    // --------------------------------------------------
-    Route::get('/summary', [DailySummaryController::class, 'index'])
-        ->name('attendance.summary.index');
-
-    Route::post('/summary/resolve', [DailySummaryController::class, 'resolve'])
-        ->name('attendance.summary.resolve');
 
     // --------------------------------------------------
     // Empleados SUAN

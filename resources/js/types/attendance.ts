@@ -20,11 +20,20 @@ export interface DailySummary {
   id: number
   employee_id: number
   date: string
-  status: AttendanceStatus
+  status:
+    | 'present'
+    | 'absent_unjustified'
+    | 'absent_justified'
+    | 'license'
+    | 'partial'
+    | 'holiday'
+    | 'anomaly'
   worked_minutes: number
-  justified: boolean
-  notes?: string | null
-
-  // Si desde Laravel haces ->with('employee')
-  employee?: Employee
+  late_minutes: number
+  early_leave_minutes: number
+  has_license: boolean
+  has_context_event: boolean
+  anomalies: any[] | null
+  notes: string | null
 }
+

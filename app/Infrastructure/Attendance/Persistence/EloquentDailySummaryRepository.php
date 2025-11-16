@@ -24,4 +24,13 @@ class EloquentDailySummaryRepository implements DailySummaryRepositoryInterface
             $data
         );
     }
+    public function getByDate(string $date): array
+    {
+        return SuanDailySummary::query()
+            ->with('employee:id,full_name,legajo,device_user_id') // relación del modelo
+            ->where('date', $date)
+            ->orderBy('employee_id')
+            ->get()
+            ->toArray();
+    }
 }

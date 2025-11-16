@@ -2,52 +2,27 @@
 
 namespace App\Http\Controllers\Attendance;
 
-use App\Domain\Attendance\Actions\ResolveDailySummaryAction;
 use App\Domain\Attendance\Repositories\DailySummaryRepositoryInterface;
 use App\Domain\Attendance\Repositories\EmployeeRepositoryInterface;
-use App\Http\Controllers\Controller;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
-class DailySummaryController extends Controller
+class DailySummaryController
 {
-    /**
-     * GET /attendance/summary?date=YYYY-MM-DD
-     * Devuelve resúmenes diarios.
-     */
-    public function index(Request $request, DailySummaryRepositoryInterface $summaryRepo)
+    public function __construct(
+        private DailySummaryRepositoryInterface $summaryRepo,
+        private EmployeeRepositoryInterface $employeeRepo
+    ) {}
+
+    public function index(Request $request)
     {
-        $date = $request->query('date', Carbon::today()->toDateString());
+        $date = $request->query('date', now()->toDateString());
 
-        $summaries = $summaryRepo->forRange($date, $date);
+        $summaries = $this->summaryRepo->getByDate($date);
 
-        return response()->json([
+        return Inertia::render('Attendance/Dashboard', [
             'date' => $date,
             'summaries' => $summaries,
-        ]);
-    }
-
-    /**
-     * POST /attendance/summary/resolve?date=YYYY-MM-DD
-     * Ejecuta el consolidado del día.
-     */
-    public function resolve(
-        Request $request,
-        EmployeeRepositoryInterface $employeeRepo,
-        ResolveDailySummaryAction $action
-    ) {
-        $date = $request->query('date', Carbon::today()->toDateString());
-
-        $employees = $employeeRepo->allActive();
-
-        foreach ($employees as $employee) {
-            $action->execute($employee->id, $date);
-        }
-
-        return response()->json([
-            'success' => true,
-            'date' => $date,
-            'count' => count($employees),
         ]);
     }
 }
