@@ -39,7 +39,7 @@ class SuanAnomaly extends Model
     /** Relaciones */
     public function employee(): BelongsTo
     {
-        return $this->belongsTo(SuanEmployee::class, 'employee_id');
+        return $this->belongsTo(SuanLaborLink::class, 'labor_link_id');
     }
 
     /** Scopes */

@@ -7,9 +7,9 @@ use App\Domain\Attendance\DTO\ProcessedRecordDTO;
 interface AttendanceRecordRepositoryInterface
 {
     /**
-     * Elimina todos los registros procesados de un empleado en un día.
+     * Elimina todos los registros procesados de un vínculo laboral en un día.
      */
-    public function deleteByEmployeeAndDate(int $employeeId, string $date): void;
+    public function deleteByLaborLinkAndDate(int $laborLinkId, string $date): void;
 
     /**
      * Inserta un registro procesado.
@@ -17,7 +17,7 @@ interface AttendanceRecordRepositoryInterface
     public function store(ProcessedRecordDTO $dto): void;
 
     /**
-     * Devuelve todos los registros procesados de un empleado en una fecha.
+     * Devuelve todos los registros procesados de un vínculo laboral en una fecha.
      */
-    public function getByEmployeeAndDate(int $employeeId, string $date): array;
+    public function getByLaborLinkAndDate(int $laborLinkId, string $date): array;
 }

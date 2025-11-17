@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('suan_anomalies', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('employee_id')
-                ->constrained('suan_employees')
+            $table->foreignId('labor_link_id')
+                ->constrained('suan_labor_links')
                 ->cascadeOnDelete();
 
             $table->date('date')->index();

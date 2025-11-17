@@ -13,8 +13,8 @@ return new class extends Migration
             $table->id();
 
             // Empleado
-            $table->foreignId('employee_id')
-                ->constrained('suan_employees')
+            $table->foreignId('labor_link_id')
+                ->constrained('suan_labor_links')
                 ->cascadeOnDelete();
 
             // Fecha normalizada (solo yyyy-mm-dd)
@@ -43,8 +43,8 @@ return new class extends Migration
 
             // Evitar duplicados exactos de marcación
             $table->unique(
-                ['employee_id', 'recorded_at'],
-                'unique_employee_recorded_at'
+                ['labor_link_id', 'recorded_at'],
+                'unique_labor_link_recorded_at'
             );
         });
     }

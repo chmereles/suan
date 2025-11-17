@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('suan_licenses', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('employee_id')
-                ->constrained('suan_employees')
+            $table->foreignId('labor_link_id')
+                ->constrained('suan_labor_links')
                 ->cascadeOnDelete();
 
             $table->date('date')->index();
@@ -22,7 +22,7 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->unique(['employee_id', 'date'], 'unique_license_employee_date');
+            $table->unique(['labor_link_id', 'date'], 'unique_license_labor_link_date');
         });
     }
 

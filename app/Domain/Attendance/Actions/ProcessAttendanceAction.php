@@ -2,38 +2,64 @@
 
 namespace App\Domain\Attendance\Actions;
 
-use App\Domain\Attendance\Repositories\EmployeeRepositoryInterface;
-use App\Domain\Attendance\Services\AttendanceProcessorService;
+use App\Domain\Attendance\Repositories\PersonRepositoryInterface;
+use App\Domain\Attendance\Repositories\LaborLinkRepositoryInterface;
+use App\Domain\Attendance\Repositories\AttendanceRecordRepositoryInterface;
+use App\Domain\Attendance\Services\AttendanceRecordProcessor;
 use Illuminate\Support\Collection;
 
 /**
- * Caso de uso: Procesar los logs de asistencia para un empleado en una fecha.
+ * Caso de uso: Procesar los logs brutos (por device_user_id)
+ * y generar registros interpretados por vínculo laboral.
  */
 class ProcessAttendanceAction
 {
     public function __construct(
-        private AttendanceProcessorService $processor,
-        private EmployeeRepositoryInterface $employeeRepo
+        private PersonRepositoryInterface $personRepo,
+        private LaborLinkRepositoryInterface $laborLinks,
+        private AttendanceRecordRepositoryInterface $records,
+        private AttendanceRecordProcessor $processor
     ) {}
 
     /**
-     * @param  string  $deviceUserId  → ID del reloj biométrico
-     * @param  string  $date  → Fecha en formato YYYY-MM-DD
-     * @param  Collection  $logs  → logs crudos ya filtrados
+     * @param string     $deviceUserId → ID biométrico
+     * @param string     $date         → YYYY-MM-DD
+     * @param Collection $logs         → logs crudos filtrados por device_user_id
      */
-    public function execute(string $deviceUserId, string $date, Collection $logs)
+    public function execute(string $deviceUserId, string $date, Collection $logs): void
     {
-        $employee = $this->employeeRepo->findByDeviceUserId($deviceUserId);
+        // 1. Encontrar persona por deviceUserId
+        $person = $this->personRepo->findByDeviceUserId($deviceUserId);
 
-        if (! $employee) {
-            // Se ignoran los logs de empleados no mapeados aún
-            return null;
+        if (! $person) {
+            // Si no existe la persona todavía, ignorar logs
+            return;
         }
 
-        return $this->processor->processEmployeeLogs(
-            logs: $logs,
-            employeeId: $employee->id,
-            date: $date
-        );
+        // 2. Obtener vínculos laborales activos de la persona
+        $activeLinks = $this->laborLinks->getActiveByPersonId($person->id);
+
+        if ($activeLinks->isEmpty()) {
+            return;
+        }
+
+        // 3. Por cada vínculo laboral, procesar los logs
+        foreach ($activeLinks as $link) {
+
+            // 3.1 Limpia registros anteriores de ese vínculo/día
+            $this->records->deleteByLaborLinkAndDate($link->id, $date);
+
+            // 3.2 Interpretar los logs según el vínculo
+            $processed = $this->processor->processLaborLinkLogs(
+                logs: $logs,
+                laborLinkId: $link->id,
+                date: $date
+            );
+
+            // 3.3 Guardar cada registro interpretado
+            foreach ($processed as $dto) {
+                $this->records->store($dto);
+            }
+        }
     }
 }

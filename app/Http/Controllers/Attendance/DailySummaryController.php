@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Attendance;
 
 use App\Domain\Attendance\Repositories\DailySummaryRepositoryInterface;
-use App\Domain\Attendance\Repositories\EmployeeRepositoryInterface;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -11,7 +10,6 @@ class DailySummaryController
 {
     public function __construct(
         private DailySummaryRepositoryInterface $summaryRepo,
-        private EmployeeRepositoryInterface $employeeRepo
     ) {}
 
     public function index(Request $request)

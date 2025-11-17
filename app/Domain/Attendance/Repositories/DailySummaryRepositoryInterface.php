@@ -7,14 +7,14 @@ use App\Domain\Attendance\Models\SuanDailySummary;
 interface DailySummaryRepositoryInterface
 {
     /**
-     * Obtiene un resumen para empleado + fecha.
+     * Obtiene un resumen para vínculo laboral + fecha.
      */
-    public function findByEmployeeAndDate(int $employeeId, string $date): ?SuanDailySummary;
+    public function findByLaborLinkAndDate(int $laborLinkId, string $date): ?SuanDailySummary;
 
     /**
      * Crea o actualiza un resumen diario.
      */
-    public function storeOrUpdate(int $employeeId, string $date, array $data): SuanDailySummary;
+    public function storeOrUpdate(int $laborLinkId, string $date, array $data): SuanDailySummary;
 
     /**
      * Devuelve todos los resúmenes diarios de una fecha,

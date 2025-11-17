@@ -13,8 +13,8 @@ return new class extends Migration
             $table->id();
 
             // Empleado
-            $table->foreignId('employee_id')
-                ->constrained('suan_employees')
+            $table->foreignId('labor_link_id')
+                ->constrained('suan_labor_links')
                 ->cascadeOnDelete();
 
             // Fecha
@@ -55,7 +55,7 @@ return new class extends Migration
             $table->timestamps();
 
             // Un empleado solo puede tener un resumen por día
-            $table->unique(['employee_id', 'date'], 'unique_daily_summary_employee_date');
+            $table->unique(['labor_link_id', 'date'], 'unique_daily_summary_labor_link_date');
         });
     }
 

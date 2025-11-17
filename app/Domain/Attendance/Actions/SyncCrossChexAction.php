@@ -2,26 +2,21 @@
 
 namespace App\Domain\Attendance\Actions;
 
-use App\Domain\Attendance\Repositories\AttendanceRecordRepositoryInterface;
-use App\Domain\Attendance\Repositories\EmployeeRepositoryInterface;
-use App\Domain\Attendance\Services\AttendanceProcessorService;
 use App\Infrastructure\Attendance\CrossChex\CrossChexClient;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 /**
- * Caso de uso: Sincronizar CrossChex → Attendance Logs → Attendance Records
+ * Caso de uso: Sincronizar CrossChex → attendance_logs
  *
- * Este Action es el "pipeline" completo de sincronización de SUAN.
+ * Este action SOLO inserta logs crudos.
+ * El procesamiento posterior lo realiza ProcessAttendanceAction.
  */
 class SyncCrossChexAction
 {
     public function __construct(
         private CrossChexClient $client,
-        private AttendanceProcessorService $processor,
-        private EmployeeRepositoryInterface $employeeRepo,
-        private AttendanceRecordRepositoryInterface $attendanceRepo,
     ) {}
 
     /**
@@ -40,37 +35,39 @@ class SyncCrossChexAction
         ]);
 
         try {
-            $logs = collect($this->client->getAllRecords($start, $end));
+            // 1 — Descargar todos los registros del período
+            $records = collect($this->client->getAllRecords($start, $end));
 
-            $grouped = $logs->groupBy(function ($log) {
-                return $log['device_user_id'].'-'.substr($log['recorded_at'], 0, 10);
-            });
+            // 2 — Insertar logs crudos
+            $inserted = 0;
 
-            $processed = 0;
+            foreach ($records as $log) {
+                DB::table('attendance_logs')->insert([
+                    'device_serial'    => $log['device_serial'] ?? null,
+                    'device_user_id'   => $log['device_user_id'],
+                    'raw_id'           => $log['raw_id'],
+                    'raw_payload'      => json_encode($log['raw_payload']),
+                    'record_type'      => $log['record_type'] ?? null,
+                    'recorded_at'      => $log['recorded_at'],
+                    'created_at'       => now(),
+                    'updated_at'       => now(),
+                ]);
 
-            foreach ($grouped as $key => $items) {
-                [$deviceUserId, $date] = explode('-', $key);
-
-                $this->processor->processEmployeeLogs(
-                    logs: $items,
-                    employeeId: optional($this->employeeRepo->findByDeviceUserId($deviceUserId))->id,
-                    date: $date
-                );
-
-                $processed++;
+                $inserted++;
             }
 
+            // 3 — Guardar estado OK de la sincronización
             DB::table('attendance_sync_logs')
                 ->where('id', $syncId)
                 ->update([
-                    'finished_at' => now(),
-                    'inserted_count' => $processed,
-                    'status' => 'ok',
+                    'finished_at'    => now(),
+                    'inserted_count' => $inserted,
+                    'status'         => 'ok',
                 ]);
 
             return [
-                'status' => 'ok',
-                'processed' => $processed,
+                'status'     => 'ok',
+                'inserted'   => $inserted,
             ];
 
         } catch (\Throwable $e) {
@@ -78,8 +75,8 @@ class SyncCrossChexAction
             DB::table('attendance_sync_logs')
                 ->where('id', $syncId)
                 ->update([
-                    'finished_at' => now(),
-                    'status' => 'error',
+                    'finished_at'   => now(),
+                    'status'        => 'error',
                     'error_message' => $e->getMessage(),
                 ]);
 

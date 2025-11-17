@@ -4,13 +4,15 @@ namespace App\Domain\Attendance\Actions;
 
 use App\Domain\Attendance\Repositories\AttendanceLogRepositoryInterface;
 use App\Domain\Attendance\Repositories\AttendanceRecordRepositoryInterface;
-use App\Domain\Attendance\Repositories\EmployeeRepositoryInterface;
+use App\Domain\Attendance\Repositories\LaborLinkRepositoryInterface;
+use App\Domain\Attendance\Repositories\PersonRepositoryInterface;
 use App\Domain\Attendance\Services\AttendanceRecordProcessor;
 
 class ProcessAttendanceRecordsAction
 {
     public function __construct(
-        private EmployeeRepositoryInterface $employeeRepo,
+        private PersonRepositoryInterface $personRepo,
+        private LaborLinkRepositoryInterface $laborLinkRepo,
         private AttendanceLogRepositoryInterface $logRepo,
         private AttendanceRecordRepositoryInterface $recordRepo,
         private AttendanceRecordProcessor $processor
@@ -18,31 +20,42 @@ class ProcessAttendanceRecordsAction
 
     public function __invoke(string $deviceUserId, string $date): void
     {
-        // 1 — Buscar empleado
-        $employee = $this->employeeRepo->findByDeviceUserId($deviceUserId);
+        // 1 — Buscar persona por ID biométrico
+        $person = $this->personRepo->findByDeviceUserId($deviceUserId);
 
-        if (! $employee) {
+        if (! $person) {
             return;
         }
 
-        // 2 — Tomar logs crudos de ese día
+        // 2 — Vinculos laborales activos
+        $laborLinks = $this->laborLinkRepo->getActiveByPersonId($person->id);
+
+        if ($laborLinks->isEmpty()) {
+            return;
+        }
+
+        // 3 — Logs brutos de ese día
         $logs = collect(
             $this->logRepo->getByDeviceUserAndDate($deviceUserId, $date)
         );
 
-        // 3 — Eliminar registros procesados previos
-        $this->recordRepo->deleteByEmployeeAndDate($employee->id, $date);
+        // 4 — Procesar para cada vínculo laboral
+        foreach ($laborLinks as $link) {
 
-        // 4 — Procesar logs
-        $processed = $this->processor->processEmployeeLogs(
-            logs: $logs,
-            employeeId: $employee->id,
-            date: $date
-        );
+            // 4.1 — Limpiar los registros procesados previos
+            $this->recordRepo->deleteByLaborLinkAndDate($link->id, $date);
 
-        // 5 — Guardar cada registro procesado
-        foreach ($processed as $dto) {
-            $this->recordRepo->store($dto);
+            // 4.2 — Interpretar los logs según el horario del vínculo
+            $processed = $this->processor->processLaborLinkLogs(
+                logs: $logs,
+                laborLinkId: $link->id,
+                date: $date
+            );
+
+            // 4.3 — Almacenar cada registro generado
+            foreach ($processed as $dto) {
+                $this->recordRepo->store($dto);
+            }
         }
     }
 }

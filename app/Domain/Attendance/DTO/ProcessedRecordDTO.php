@@ -9,7 +9,7 @@ namespace App\Domain\Attendance\DTO;
 class ProcessedRecordDTO
 {
     /**
-     * @param  int  $employeeId  ID interno del empleado (suan_employees.id)
+     * @param  int  $laborLinkId  ID interno del empleado (suan_employees.id)
      * @param  string  $date  Fecha normalizada (YYYY-MM-DD)
      * @param  string|null  $type  Segmento/Tipo inferido (ej: 'morning', 'afternoon', 'extra', etc.)
      * @param  string  $recordedAt  Timestamp completo de la marcación (Y-m-d H:i:s)
@@ -19,7 +19,7 @@ class ProcessedRecordDTO
      * @param  array  $metadata  Info adicional de procesamiento (orden, source, etc.)
      */
     public function __construct(
-        public int $employeeId,
+        public int $laborLinkId,
         public string $date,
         public ?string $type,
         public string $recordedAt,

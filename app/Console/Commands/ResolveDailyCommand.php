@@ -2,53 +2,53 @@
 
 namespace App\Console\Commands;
 
-use App\Domain\Attendance\Actions\ProcessAttendanceRecordsAction;
+use App\Domain\Attendance\Actions\ProcessAttendanceAction;
 use App\Domain\Attendance\Actions\ResolveDailySummaryAction;
-use App\Domain\Attendance\Repositories\EmployeeRepositoryInterface;
+use App\Domain\Attendance\Actions\SyncCrossChexAction;
+use App\Domain\Attendance\Repositories\LaborLinkRepositoryInterface;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
-class ResolveDailyCommand extends Command
+class ProcessDayCommand extends Command
 {
-    protected $signature = 'suan:resolve-daily {--date=}';
+    protected $signature = 'suan:process-day {date?}';
+    protected $description = 'Ejecuta sincronización + procesamiento + resumen para un día.';
 
-    protected $description = 'Procesa y resuelve la asistencia completa de un día (attendance + summary)';
-
-    public function __construct(
-        private EmployeeRepositoryInterface $employees,
-        private ProcessAttendanceRecordsAction $processAttendance,
-        private ResolveDailySummaryAction $resolveSummary
+    public function handle(
+        SyncCrossChexAction $sync,
+        ProcessAttendanceAction $processAction,
+        ResolveDailySummaryAction $summaryAction,
+        LaborLinkRepositoryInterface $laborLinks
     ) {
-        parent::__construct();
-    }
+        $date = $this->argument('date')
+            ?? Carbon::yesterday()->toDateString();
 
-    public function handle()
-    {
-        $date = $this->option('date') ?? now()->toDateString();
+        $this->info("========== Procesando Día Completo: $date ==========");
 
-        $this->info("== SUAN :: Procesando día $date ==");
+        // 1. sincronizar logs crudos
+        $this->info('Sincronizando logs del día...');
+        $sync->execute(Carbon::parse("$date 00:00:00"), Carbon::parse("$date 23:59:59"));
 
-        $employees = $this->employees->allMapped(); // método que ya estamos usando
-        $count = count($employees);
+        // 2. procesar fichadas
+        $this->info('Procesando asistencia...');
+        $logs = DB::table('attendance_logs')
+            ->whereDate('recorded_at', $date)
+            ->get()
+            ->groupBy('device_user_id');
 
-        $this->info("Empleados encontrados: $count");
-
-        foreach ($employees as $employee) {
-
-            $this->line("Procesando empleado [{$employee->id}] {$employee->full_name}");
-
-            // 1. Procesar logs → suan_attendance_records
-            // $this->processAttendance->execute($employee->device_user_id, $date);
-            ($this->processAttendance)(
-                $employee->device_user_id,
-                $date
-            );
-
-            // 2. Resolver resumen diario → suan_daily_summary
-            $this->resolveSummary->execute($employee->id, $date);
+        foreach ($logs as $deviceId => $items) {
+            $processAction->execute($deviceId, $date, collect($items));
         }
 
-        $this->info('✔ Día procesado correctamente.');
+        // 3. resolver resúmenes diarios por vínculo laboral
+        $this->info('Resolviendo resumen diario...');
+        foreach ($laborLinks->allActive() as $link) {
+            $summaryAction->execute($link->id, $date);
+        }
 
-        return Command::SUCCESS;
+        $this->info("Proceso completo para $date finalizado.");
+
+        return self::SUCCESS;
     }
 }

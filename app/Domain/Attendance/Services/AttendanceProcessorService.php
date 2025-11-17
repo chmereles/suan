@@ -5,7 +5,6 @@ namespace App\Domain\Attendance\Services;
 use App\Domain\Attendance\Models\SuanAttendanceRecord;
 use App\Domain\Attendance\Repositories\AnomalyRepositoryInterface;
 use App\Domain\Attendance\Repositories\AttendanceRecordRepositoryInterface;
-use App\Domain\Attendance\Repositories\EmployeeRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -18,7 +17,6 @@ class AttendanceProcessorService
 {
     public function __construct(
         private AttendanceRecordRepositoryInterface $attendanceRepo,
-        private EmployeeRepositoryInterface $employeeRepo,
         private AnomalyRepositoryInterface $anomalyRepo
     ) {}
 
