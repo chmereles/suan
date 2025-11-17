@@ -9,13 +9,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Class SuanContextEvent
  *
- * Notas y justificativos cargados por jefes
+ * Notas, observaciones, comisiones, justificaciones, etc.,
+ * asociadas a un vínculo laboral (labor_link_id).
  *
  * @property int $id
- * @property int $employee_id
+ * @property int $labor_link_id
  * @property \Carbon\Carbon $date
- * @property string $note_type
- * @property string $content
+ * @property string $type
+ * @property string|null $source
+ * @property string|null $description
+ * @property array|null $metadata
  * @property int|null $created_by
  */
 class SuanContextEvent extends Model
@@ -23,9 +26,9 @@ class SuanContextEvent extends Model
     protected $table = 'suan_context_events';
 
     protected $fillable = [
-        'employee_id',
+        'labor_link_id',
         'date',
-        'type_id',
+        'type',
         'source',
         'description',
         'metadata',
@@ -38,9 +41,9 @@ class SuanContextEvent extends Model
     ];
 
     /** Relaciones */
-    public function employee(): BelongsTo
+    public function laborLink(): BelongsTo
     {
-        return $this->belongsTo(SuanEmployee::class, 'employee_id');
+        return $this->belongsTo(SuanLaborLink::class, 'labor_link_id');
     }
 
     public function creator()
@@ -48,10 +51,12 @@ class SuanContextEvent extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function scopeForEmployeeAndDate($query, int $employeeId, string $date)
+    /** Scopes */
+
+    public function scopeForLaborLinkAndDate($query, int $laborLinkId, string $date)
     {
-        return $query->where('employee_id', $employeeId)
-            ->whereDate('date', $date);
+        return $query->where('labor_link_id', $laborLinkId)
+                     ->whereDate('date', $date);
     }
 
     public function scopeForDate($query, string $date)

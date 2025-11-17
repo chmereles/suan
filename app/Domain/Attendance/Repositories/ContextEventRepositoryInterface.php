@@ -9,7 +9,7 @@ interface ContextEventRepositoryInterface
 {
     public function store(array $data): SuanContextEvent;
 
-    public function hasEventForDate(int $employeeId, CarbonInterface $date): bool;
+    public function hasEventForDate(int $laborLinkId, CarbonInterface $date): bool;
 
-    public function getForEmployeeAndDate(int $employeeId, CarbonInterface $date): array;
+    public function getForLaborLinkAndDate(int $laborLinkId, CarbonInterface $date): array;
 }

@@ -23,7 +23,7 @@ class SuanDailySummary extends Model
     protected $table = 'suan_daily_summary';
 
     protected $fillable = [
-        'employee_id',
+        'labor_link_id',
         'date',
         'status',
         'worked_minutes',

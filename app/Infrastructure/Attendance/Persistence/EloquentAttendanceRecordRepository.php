@@ -8,10 +8,10 @@ use Illuminate\Support\Facades\DB;
 
 class EloquentAttendanceRecordRepository implements AttendanceRecordRepositoryInterface
 {
-    public function deleteByLaborLinkAndDate(int $employeeId, string $date): void
+    public function deleteByLaborLinkAndDate(int $laborLinkId, string $date): void
     {
         DB::table('suan_attendance_records')
-            ->where('employee_id', $employeeId)
+            ->where('labor_link_id', $laborLinkId)
             ->where('date', $date)
             ->delete();
     }
@@ -19,23 +19,23 @@ class EloquentAttendanceRecordRepository implements AttendanceRecordRepositoryIn
     public function store(ProcessedRecordDTO $dto): void
     {
         DB::table('suan_attendance_records')->insert([
-            'employee_id' => $dto->laborLinkId,
-            'date' => $dto->date,
-            'type' => $dto->type,
-            'recorded_at' => $dto->recordedAt,
+            'labor_link_id'     => $dto->laborLinkId,
+            'date'              => $dto->date,
+            'type'              => $dto->type,
+            'recorded_at'       => $dto->recordedAt,
             'attendance_log_id' => $dto->attendanceLogId,
-            'raw_id' => $dto->rawId,
-            'raw_payload' => json_encode($dto->rawPayload),
-            'metadata' => json_encode($dto->metadata),
-            'created_at' => now(),
-            'updated_at' => now(),
+            'raw_id'            => $dto->rawId,
+            'raw_payload'       => json_encode($dto->rawPayload),
+            'metadata'          => json_encode($dto->metadata),
+            'created_at'        => now(),
+            'updated_at'        => now(),
         ]);
     }
 
-    public function getByLaborLinkAndDate(int $employeeId, string $date): array
+    public function getByLaborLinkAndDate(int $laborLinkId, string $date): array
     {
         return DB::table('suan_attendance_records')
-            ->where('employee_id', $employeeId)
+            ->where('labor_link_id', $laborLinkId)
             ->where('date', $date)
             ->orderBy('recorded_at')
             ->get()

@@ -8,34 +8,46 @@ use Carbon\CarbonInterface;
 
 class EloquentLicenseRepository implements LicenseRepositoryInterface
 {
-    public function findForEmployeeAndDate(int $employeeId, string $date): ?SuanLicense
+    /**
+     * Obtiene una licencia puntual para un vínculo laboral y fecha.
+     */
+    public function findForLaborLinkAndDate(int $laborLinkId, string $date): ?SuanLicense
     {
-        return SuanLicense::where('employee_id', $employeeId)
+        return SuanLicense::where('labor_link_id', $laborLinkId)
             ->where('date', $date)
             ->first();
     }
 
+    /**
+     * Crea o actualiza una licencia.
+     */
     public function createOrUpdate(array $data): SuanLicense
     {
         return SuanLicense::updateOrCreate(
             [
-                'employee_id' => $data['employee_id'],
-                'date' => $data['date'],
+                'labor_link_id' => $data['labor_link_id'],
+                'date'          => $data['date'],
             ],
             $data
         );
     }
 
-    public function hasLicenseForDate(int $employeeId, CarbonInterface $date): bool
+    /**
+     * Verifica si un vínculo laboral tiene licencia para la fecha.
+     */
+    public function hasLicenseForDate(int $laborLinkId, CarbonInterface $date): bool
     {
-        return SuanLicense::where('employee_id', $employeeId)
+        return SuanLicense::where('labor_link_id', $laborLinkId)
             ->whereDate('date', $date->toDateString())
             ->exists();
     }
 
-    public function getLicensesForDate(int $employeeId, CarbonInterface $date): array
+    /**
+     * Devuelve todas las licencias del vínculo en una fecha.
+     */
+    public function getLicensesForDate(int $laborLinkId, CarbonInterface $date): array
     {
-        return SuanLicense::where('employee_id', $employeeId)
+        return SuanLicense::where('labor_link_id', $laborLinkId)
             ->whereDate('date', $date->toDateString())
             ->get()
             ->toArray();
