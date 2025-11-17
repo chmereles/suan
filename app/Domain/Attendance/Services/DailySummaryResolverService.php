@@ -2,6 +2,7 @@
 
 namespace App\Domain\Attendance\Services;
 
+use App\Domain\Attendance\Enums\AnomalyType;
 use App\Domain\Attendance\Enums\DailyStatus;
 use App\Domain\Attendance\Repositories\AttendanceRecordRepositoryInterface;
 use App\Domain\Attendance\Repositories\DailySummaryRepositoryInterface;
@@ -57,7 +58,7 @@ class DailySummaryResolverService
         // ---------------------------------------------------------
         if (empty($records) && $hasLicense) {
             return $this->summaryRepo->storeOrUpdate($laborLinkId, $date, [
-                'status'            => DailyStatus::LICENSE,
+                'status'            => DailyStatus::LICENSE->value,
                 'has_license'       => true,
                 'has_context_event' => $hasContextEvent,
                 'worked_minutes'    => 0,
@@ -69,10 +70,11 @@ class DailySummaryResolverService
         // 6) Si no hay registros y no está justificado → ausente
         // ---------------------------------------------------------
         if (empty($records) && ! $hasContextEvent) {
+            $status = DailyStatus::ABSENT_UNJUSTIFIED->value;
             return $this->summaryRepo->storeOrUpdate($laborLinkId, $date, [
-                'status'            => DailyStatus::ABSENT_UNJUSTIFIED,
+                'status'            => $status,
                 'worked_minutes'    => 0,
-                'anomalies'         => ['no_marks' => true],
+                'anomalies'         => [AnomalyType::NO_MARKS->value => true],
             ]);
         }
 
@@ -81,7 +83,7 @@ class DailySummaryResolverService
         // ---------------------------------------------------------
         if (empty($records) && $hasContextEvent) {
             return $this->summaryRepo->storeOrUpdate($laborLinkId, $date, [
-                'status'            => DailyStatus::ABSENT_JUSTIFIED,
+                'status'            => DailyStatus::ABSENT_JUSTIFIED->value,
                 'has_license'       => false,
                 'has_context_event' => true,
                 'worked_minutes'    => 0,
@@ -121,7 +123,7 @@ class DailySummaryResolverService
         // 9) Guardar resumen final
         // ---------------------------------------------------------
         return $this->summaryRepo->storeOrUpdate($laborLinkId, $date, [
-            'status'              => $status,
+            'status'              => $status->value,
             'has_license'         => $hasLicense,
             'has_context_event'   => $hasContextEvent,
             'worked_minutes'      => $workedMinutes,
