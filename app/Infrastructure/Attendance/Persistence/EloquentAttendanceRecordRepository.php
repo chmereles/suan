@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class EloquentAttendanceRecordRepository implements AttendanceRecordRepositoryInterface
 {
-    public function deleteByEmployeeAndDate(int $employeeId, string $date): void
+    public function deleteByLaborLinkAndDate(int $employeeId, string $date): void
     {
         DB::table('suan_attendance_records')
             ->where('employee_id', $employeeId)
@@ -19,7 +19,7 @@ class EloquentAttendanceRecordRepository implements AttendanceRecordRepositoryIn
     public function store(ProcessedRecordDTO $dto): void
     {
         DB::table('suan_attendance_records')->insert([
-            'employee_id' => $dto->employeeId,
+            'employee_id' => $dto->laborLinkId,
             'date' => $dto->date,
             'type' => $dto->type,
             'recorded_at' => $dto->recordedAt,
@@ -32,7 +32,7 @@ class EloquentAttendanceRecordRepository implements AttendanceRecordRepositoryIn
         ]);
     }
 
-    public function getByEmployeeAndDate(int $employeeId, string $date): array
+    public function getByLaborLinkAndDate(int $employeeId, string $date): array
     {
         return DB::table('suan_attendance_records')
             ->where('employee_id', $employeeId)
