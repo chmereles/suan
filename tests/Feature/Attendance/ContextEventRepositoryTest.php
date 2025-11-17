@@ -15,7 +15,7 @@ it('detects context events for a labor link and date', function () {
 
     $repo->store([
         'labor_link_id' => $link->id,
-        'type' => 'justification',
+        'type_id' => 1,
         'date' => '2025-01-10',
         'description' => 'Test',
         'metadata' => [],

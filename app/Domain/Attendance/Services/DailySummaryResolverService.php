@@ -2,6 +2,7 @@
 
 namespace App\Domain\Attendance\Services;
 
+use App\Domain\Attendance\Enums\DailyStatus;
 use App\Domain\Attendance\Repositories\AttendanceRecordRepositoryInterface;
 use App\Domain\Attendance\Repositories\DailySummaryRepositoryInterface;
 use App\Domain\Attendance\Repositories\LicenseRepositoryInterface;
@@ -56,7 +57,7 @@ class DailySummaryResolverService
         // ---------------------------------------------------------
         if (empty($records) && $hasLicense) {
             return $this->summaryRepo->storeOrUpdate($laborLinkId, $date, [
-                'status'            => 'license',
+                'status'            => DailyStatus::LICENSE,
                 'has_license'       => true,
                 'has_context_event' => $hasContextEvent,
                 'worked_minutes'    => 0,
@@ -69,12 +70,28 @@ class DailySummaryResolverService
         // ---------------------------------------------------------
         if (empty($records) && ! $hasContextEvent) {
             return $this->summaryRepo->storeOrUpdate($laborLinkId, $date, [
-                'status'            => 'absent_unjustified',
+                'status'            => DailyStatus::ABSENT_UNJUSTIFIED,
                 'worked_minutes'    => 0,
                 'anomalies'         => ['no_marks' => true],
             ]);
         }
 
+        // ---------------------------------------------------------
+        // 6.b) Si no hay registros pero SÍ hay evento de contexto → ausente justificado
+        // ---------------------------------------------------------
+        if (empty($records) && $hasContextEvent) {
+            return $this->summaryRepo->storeOrUpdate($laborLinkId, $date, [
+                'status'            => DailyStatus::ABSENT_JUSTIFIED,
+                'has_license'       => false,
+                'has_context_event' => true,
+                'worked_minutes'    => 0,
+                'anomalies'         => [],
+                'metadata'          => [
+                    'reason' => 'context_event',
+                ],
+            ]);
+        }
+        
         // ---------------------------------------------------------
         // 7) Interpretar Check-In / Check-Out
         // ---------------------------------------------------------
@@ -92,12 +109,12 @@ class DailySummaryResolverService
         // ---------------------------------------------------------
         $anomalies = $this->anomalyDetector->detect($records, $laborLinkId, $date);
 
-        $status = empty($anomalies) ? 'present' : 'anomaly';
+        $status = empty($anomalies) ? DailyStatus::PRESENT : DailyStatus::ANOMALY;
 
         if ($hasLicense) {
-            $status = 'license';
+            $status = DailyStatus::LICENSE;
         } elseif ($hasContextEvent) {
-            $status = 'absent_justified';
+            $status = DailyStatus::ABSENT_JUSTIFIED;
         }
 
         // ---------------------------------------------------------

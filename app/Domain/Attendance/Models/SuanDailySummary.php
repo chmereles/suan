@@ -2,6 +2,7 @@
 
 namespace App\Domain\Attendance\Models;
 
+use App\Domain\Attendance\Enums\DailyStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -32,6 +33,7 @@ class SuanDailySummary extends Model
     ];
 
     protected $casts = [
+        'status' => DailyStatus::class,
         'date' => 'date',
         'worked_minutes' => 'integer',
         'justified' => 'boolean',

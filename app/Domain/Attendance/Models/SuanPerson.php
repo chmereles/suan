@@ -2,11 +2,14 @@
 
 namespace App\Domain\Attendance\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SuanPerson extends Model
 {
+    use HasFactory;
+    
     protected $table = 'suan_people';
 
     protected $fillable = [

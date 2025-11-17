@@ -2,11 +2,14 @@
 
 namespace App\Domain\Attendance\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SuanLaborLink extends Model
 {
+    use HasFactory;
+
     protected $table = 'suan_labor_links';
 
     protected $fillable = [
@@ -29,11 +32,11 @@ class SuanLaborLink extends Model
         return $this->belongsTo(SuanPerson::class, 'person_id');
     }
 
-    public static function boot()
-    {
-        parent::boot();
+    // public static function boot()
+    // {
+    //     parent::boot();
 
-        // Debugging the connection resolver
-        dd(static::$resolver);
-    }
+    //     // Debugging the connection resolver
+    //     dd(static::$resolver);
+    // }
 }

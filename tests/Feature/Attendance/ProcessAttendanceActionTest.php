@@ -2,6 +2,7 @@
 
 use App\Domain\Attendance\Actions\ProcessAttendanceAction;
 use App\Domain\Attendance\Models\SuanLaborLink;
+use App\Domain\Attendance\Models\SuanPerson;
 use Illuminate\Support\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -10,8 +11,16 @@ uses(RefreshDatabase::class);
 
 it('processes raw logs into processed attendance records', function () {
 
-    $link = SuanLaborLink::factory()->create([
+    // $link = SuanLaborLink::factory()->create([
+    //     'device_user_id' => 'ABC123'
+    // ]);
+
+    $person = SuanPerson::factory()->create([
         'device_user_id' => 'ABC123'
+    ]);
+    SuanLaborLink::factory()->create([
+        'person_id' => $person->id,
+        'active' => true
     ]);
 
     $logs = new Collection([

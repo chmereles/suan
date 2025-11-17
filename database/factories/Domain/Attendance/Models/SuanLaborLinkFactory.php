@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories;
+namespace Database\Factories\Domain\Attendance\Models;
 
 use App\Domain\Attendance\Models\SuanLaborLink;
 use App\Domain\Attendance\Models\SuanPerson;
@@ -12,14 +12,15 @@ class SuanLaborLinkFactory extends Factory
 
     public function definition(): array
     {
-        return [
+        $data = [
             'person_id' => SuanPerson::factory(),
-            'source' => $this->faker->word,
-            'external_id' => $this->faker->uuid,
-            'active' => $this->faker->boolean,
-            'area' => $this->faker->word,
-            'position' => $this->faker->jobTitle,
+            'source' => fake()->randomElement(['haberes', 'planes']),
+            'external_id' => fake()->uuid,
+            'active' => fake()->boolean,
+            'area' => fake()->word,
+            'position' => fake()->jobTitle,
             'schedule' => ['start' => '09:00', 'end' => '17:00'],
         ];
+        return $data;
     }
 }

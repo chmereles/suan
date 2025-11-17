@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories;
+namespace Database\Factories\Domain\Attendance\Models;
 
 use App\Domain\Attendance\Models\SuanPerson;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -12,9 +12,9 @@ class SuanPersonFactory extends Factory
     public function definition(): array
     {
         return [
-            'external_id' => $this->faker->uuid,
-            'document' => $this->faker->unique()->numerify('########'),
-            'full_name' => $this->faker->name,
+            'external_id' => fake()->uuid,
+            'document' => fake()->unique()->numerify('########'),
+            'full_name' => fake()->name,
         ];
     }
 }

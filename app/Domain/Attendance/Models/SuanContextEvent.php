@@ -3,6 +3,7 @@
 namespace App\Domain\Attendance\Models;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -23,12 +24,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class SuanContextEvent extends Model
 {
+    use HasFactory;
+    
     protected $table = 'suan_context_events';
 
     protected $fillable = [
         'labor_link_id',
         'date',
-        'type',
+        'type_id',
         'source',
         'description',
         'metadata',
