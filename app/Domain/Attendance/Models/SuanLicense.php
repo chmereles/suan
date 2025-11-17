@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Representa una licencia (del sistema de Haberes o cargada manualmente)
  *
  * @property int $id
- * @property int $employee_id
+ * @property int $labor_link_id
  * @property \Carbon\Carbon $date
  * @property string $type
  * @property string|null $description
@@ -21,7 +21,7 @@ class SuanLicense extends Model
     protected $table = 'suan_licenses';
 
     protected $fillable = [
-        'employee_id',
+        'labor_link_id',
         'date',
         'type',
         'description',

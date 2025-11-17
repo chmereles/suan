@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Evento sospechoso o inusual en la asistencia que requiere revisión humana
  *
  * @property int $id
- * @property int $employee_id
+ * @property int $labor_link_id
  * @property \Carbon\Carbon $date
  * @property string|null $anomaly_type
  * @property string|null $description
@@ -23,7 +23,7 @@ class SuanAnomaly extends Model
     protected $table = 'suan_anomalies';
 
     protected $fillable = [
-        'employee_id',
+        'labor_link_id',
         'date',
         'anomaly_type',
         'description',

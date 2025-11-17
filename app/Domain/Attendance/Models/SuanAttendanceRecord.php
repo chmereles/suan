@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * @property int $employee_id
+ * @property int $labor_link_id
  * @property string $date
  * @property string|null $check_in
  * @property string|null $check_out
@@ -21,7 +21,7 @@ class SuanAttendanceRecord extends Model
     protected $table = 'suan_attendance_records';
 
     protected $fillable = [
-        'employee_id',
+        'labor_link_id',
         'date',
         'check_in',
         'check_out',

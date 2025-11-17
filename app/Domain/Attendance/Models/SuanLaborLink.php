@@ -28,4 +28,12 @@ class SuanLaborLink extends Model
     {
         return $this->belongsTo(SuanPerson::class, 'person_id');
     }
+
+    public static function boot()
+    {
+        parent::boot();
+
+        // Debugging the connection resolver
+        dd(static::$resolver);
+    }
 }

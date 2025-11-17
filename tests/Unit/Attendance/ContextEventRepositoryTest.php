@@ -1,0 +1,27 @@
+<?php
+
+use App\Infrastructure\Attendance\Persistence\EloquentContextEventRepository;
+use App\Domain\Attendance\Models\SuanLaborLink;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Carbon\Carbon;
+
+uses(RefreshDatabase::class);
+
+it('detects context events for a labor link and date', function () {
+
+    $link = SuanLaborLink::factory()->create();
+
+    $repo = app(EloquentContextEventRepository::class);
+
+    $repo->store([
+        'labor_link_id' => $link->id,
+        'type' => 'justification',
+        'date' => '2025-01-10',
+        'description' => 'Test',
+        'metadata' => [],
+    ]);
+
+    $exists = $repo->hasEventForDate($link->id, Carbon::parse('2025-01-10'));
+
+    expect($exists)->toBeTrue();
+});

@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Representa el resultado final consolidado de un día (para liquidación)
  *
  * @property int $id
- * @property int $employee_id
+ * @property int $labor_link_id
  * @property \Carbon\Carbon $date
  * @property string $status
  * @property int $worked_minutes
