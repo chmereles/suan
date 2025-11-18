@@ -22,9 +22,4 @@ class SuanPerson extends Model
     {
         return $this->hasMany(SuanLaborLink::class, 'person_id');
     }
-
-    public function attendanceLogs(): HasMany
-    {
-        return $this->hasMany(SuanAttendanceLog::class, 'person_id');
-    }
 }

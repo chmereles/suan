@@ -6,7 +6,7 @@ use App\Domain\Attendance\DTO\ProcessedRecordDTO;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
-class AttendanceRecordProcessor
+class AnomalyDetectorService
 {
     /**
      * Procesa los logs crudos de una persona para un vínculo laboral
