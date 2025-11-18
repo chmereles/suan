@@ -2,6 +2,8 @@
 
 namespace App\Domain\Attendance\Actions;
 
+use App\Domain\Attendance\Repositories\AttendanceRepository;
+use App\Domain\Attendance\Services\CrossChexMapper;
 use App\Infrastructure\Attendance\CrossChex\CrossChexClient;
 use Carbon\Carbon;
 
@@ -9,8 +11,8 @@ class SyncCrossChexLogsAction
 {
     public function __construct(
         private readonly CrossChexClient $client,
-        private readonly \App\Domain\Attendance\Services\CrossChexMapper $mapper,
-        private readonly \App\Domain\Attendance\Repositories\AttendanceRepository $repo,
+        private readonly CrossChexMapper $mapper,
+        private readonly AttendanceRepository $repo,
     ) {}
 
     /**
