@@ -5,14 +5,14 @@ use App\Domain\Attendance\Services\AnomalyDetectorService;
 use Illuminate\Support\Collection;
 
 beforeEach(function () {
-    test()->service = new AnomalyDetectorService();
+    test()->service = new AnomalyDetectorService;
 });
 
 // ---------------------------------------------------------
 // 1) Sin marcas
 // ---------------------------------------------------------
 it('detects no marks when records are empty', function () {
-    $records = new Collection();
+    $records = new Collection;
     $result = test()->service->detect($records, 1, '2025-11-17');
 
     expect($result)->toBeArray();
@@ -25,14 +25,14 @@ it('detects no marks when records are empty', function () {
 // ---------------------------------------------------------
 it('detects single mark', function () {
     $records = new Collection([
-        (object)['recorded_at' => '2025-11-17 08:00:00'],
+        (object) ['recorded_at' => '2025-11-17 08:00:00'],
     ]);
 
     $result = test()->service->detect($records, 1, '2025-11-17');
 
     expect($result)->toContain([
         'type' => AnomalyType::SINGLE_MARK,
-        'message' => 'Solo se registró una marca (entrada o salida).'
+        'message' => 'Solo se registró una marca (entrada o salida).',
     ]);
 });
 
@@ -41,13 +41,13 @@ it('detects single mark', function () {
 // ---------------------------------------------------------
 it('detects duplicate marks', function () {
     $records = new Collection([
-        (object)['recorded_at' => '2025-11-17 08:00:00'],
-        (object)['recorded_at' => '2025-11-17 08:00:00'],
+        (object) ['recorded_at' => '2025-11-17 08:00:00'],
+        (object) ['recorded_at' => '2025-11-17 08:00:00'],
     ]);
 
     $result = test()->service->detect($records, 1, '2025-11-17');
 
-    $filtered = array_filter($result, fn($item) => $item['type'] === AnomalyType::DUPLICATE_MARKS);
+    $filtered = array_filter($result, fn ($item) => $item['type'] === AnomalyType::DUPLICATE_MARKS);
     expect($filtered)->not->toBeEmpty();
 });
 
@@ -56,13 +56,13 @@ it('detects duplicate marks', function () {
 // ---------------------------------------------------------
 it('detects out of order marks', function () {
     $records = new Collection([
-        (object)['recorded_at' => '2025-11-17 09:00:00'],
-        (object)['recorded_at' => '2025-11-17 08:00:00'], // out of order
+        (object) ['recorded_at' => '2025-11-17 09:00:00'],
+        (object) ['recorded_at' => '2025-11-17 08:00:00'], // out of order
     ]);
 
     $result = test()->service->detect($records, 1, '2025-11-17');
 
-    $filtered = array_filter($result, fn($item) => $item['type'] === AnomalyType::OUT_OF_ORDER);
+    $filtered = array_filter($result, fn ($item) => $item['type'] === AnomalyType::OUT_OF_ORDER);
     expect($filtered)->not->toBeEmpty();
 });
 
@@ -71,13 +71,13 @@ it('detects out of order marks', function () {
 // ---------------------------------------------------------
 it('detects large gap between marks', function () {
     $records = new Collection([
-        (object)['recorded_at' => '2025-11-17 08:00:00'],
-        (object)['recorded_at' => '2025-11-17 14:30:00'], // 6+ horas
+        (object) ['recorded_at' => '2025-11-17 08:00:00'],
+        (object) ['recorded_at' => '2025-11-17 14:30:00'], // 6+ horas
     ]);
 
     $result = test()->service->detect($records, 1, '2025-11-17');
 
-    $filtered = array_filter($result, fn($item) => $item['type'] === AnomalyType::LARGE_GAP);
+    $filtered = array_filter($result, fn ($item) => $item['type'] === AnomalyType::LARGE_GAP);
     expect($filtered)->not->toBeEmpty();
 });
 
@@ -87,13 +87,13 @@ it('detects large gap between marks', function () {
 // ---------------------------------------------------------
 it('detects missing checkout when last mark is too early', function () {
     $records = new Collection([
-        (object)['recorded_at' => '2025-11-17 08:00:00'],
-        (object)['recorded_at' => '2025-11-17 12:00:00'], // < 13:00
+        (object) ['recorded_at' => '2025-11-17 08:00:00'],
+        (object) ['recorded_at' => '2025-11-17 12:00:00'], // < 13:00
     ]);
 
     $result = test()->service->detect($records, 1, '2025-11-17');
 
-    $filtered = array_filter($result, fn($item) => $item['type'] === AnomalyType::MISSING_CHECKOUT);
+    $filtered = array_filter($result, fn ($item) => $item['type'] === AnomalyType::MISSING_CHECKOUT);
     expect($filtered)->not->toBeEmpty();
 
     // expect($result)->toContain(function ($a) {
@@ -106,8 +106,8 @@ it('detects missing checkout when last mark is too early', function () {
 // ---------------------------------------------------------
 it('returns no anomalies when records are normal', function () {
     $records = new Collection([
-        (object)['recorded_at' => '2025-11-17 08:00:00'],
-        (object)['recorded_at' => '2025-11-17 13:30:00'], // > expectedExit
+        (object) ['recorded_at' => '2025-11-17 08:00:00'],
+        (object) ['recorded_at' => '2025-11-17 13:30:00'], // > expectedExit
     ]);
 
     $result = test()->service->detect($records, 1, '2025-11-17');
@@ -122,18 +122,18 @@ it('returns no anomalies when records are normal', function () {
 // ---------------------------------------------------------
 it('handles combined anomalies detected in the same day', function () {
     $records = new Collection([
-        (object)['recorded_at' => '2025-11-17 08:00:00'],
-        (object)['recorded_at' => '2025-11-17 08:00:00'], // duplicate
-        (object)['recorded_at' => '2025-11-17 15:30:00'], // gap > 6h
-        (object)['recorded_at' => '2025-11-17 12:00:00'], // out of order + missing checkout
+        (object) ['recorded_at' => '2025-11-17 08:00:00'],
+        (object) ['recorded_at' => '2025-11-17 08:00:00'], // duplicate
+        (object) ['recorded_at' => '2025-11-17 15:30:00'], // gap > 6h
+        (object) ['recorded_at' => '2025-11-17 12:00:00'], // out of order + missing checkout
     ]);
 
     $result = test()->service->detect($records, 1, '2025-11-17');
 
-    $filtered = array_filter($result, fn($item) => $item['type'] === AnomalyType::DUPLICATE_MARKS);
+    $filtered = array_filter($result, fn ($item) => $item['type'] === AnomalyType::DUPLICATE_MARKS);
     expect($filtered)->not->toBeEmpty();
 
-    $filtered = array_filter($result, fn($item) => $item['type'] === AnomalyType::OUT_OF_ORDER);
+    $filtered = array_filter($result, fn ($item) => $item['type'] === AnomalyType::OUT_OF_ORDER);
     expect($filtered)->not->toBeEmpty();
 
     // $filtered = array_filter($result, fn($item) => $item['type'] === AnomalyType::LARGE_GAP);

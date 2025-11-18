@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Attendance;
 
 use App\Domain\Attendance\Actions\RegisterContextEventAction;
-use App\Domain\Attendance\Repositories\PersonRepositoryInterface;
 use App\Domain\Attendance\Repositories\LaborLinkRepositoryInterface;
+use App\Domain\Attendance\Repositories\PersonRepositoryInterface;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -22,17 +22,17 @@ class ContextEventController
         $persons = collect($this->people->all(withLaborLinks: true))
             ->map(function ($p) {
                 return [
-                    'person_id'  => $p->id,
-                    'full_name'  => $p->full_name,
-                    'document'   => $p->document,
-                    'links'      => $p->laborLinks
+                    'person_id' => $p->id,
+                    'full_name' => $p->full_name,
+                    'document' => $p->document,
+                    'links' => $p->laborLinks
                         ->where('active', true)
                         ->map(fn ($l) => [
-                            'id'         => $l->id,          // ← labor_link_id
-                            'source'     => $l->source,      // haberes / planes
-                            'area'       => $l->area,
-                            'position'   => $l->position,
-                            'schedule'   => $l->schedule,
+                            'id' => $l->id,          // ← labor_link_id
+                            'source' => $l->source,      // haberes / planes
+                            'area' => $l->area,
+                            'position' => $l->position,
+                            'schedule' => $l->schedule,
                         ])
                         ->values()
                         ->toArray(),
@@ -42,9 +42,9 @@ class ContextEventController
             ->toArray();
 
         return Inertia::render('Attendance/ContextEvent/Create', [
-            'date'     => $request->query('date', now()->toDateString()),
-            'linkId'   => $request->query('labor_link_id'),
-            'persons'  => $persons,
+            'date' => $request->query('date', now()->toDateString()),
+            'linkId' => $request->query('labor_link_id'),
+            'persons' => $persons,
         ]);
     }
 
@@ -52,19 +52,19 @@ class ContextEventController
     {
         $validated = $request->validate([
             'labor_link_id' => 'required|integer|exists:suan_labor_links,id',
-            'date'          => 'required|date',
-            'type'          => 'required|string|max:50',
-            'description'   => 'nullable|string',
+            'date' => 'required|date',
+            'type' => 'required|string|max:50',
+            'description' => 'nullable|string',
         ]);
 
         // 2. Registrar nota
         ($this->registerNote)(
             laborLinkId: (int) $validated['labor_link_id'],
-            date:        $validated['date'],
-            type:        $validated['type'],
+            date: $validated['date'],
+            type: $validated['type'],
             description: $validated['description'] ?? null,
-            metadata:    ['source' => 'manual'],
-            createdBy:   $request->user()?->id
+            metadata: ['source' => 'manual'],
+            createdBy: $request->user()?->id
         );
 
         return redirect()

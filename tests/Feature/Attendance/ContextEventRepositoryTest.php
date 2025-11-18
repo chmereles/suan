@@ -1,9 +1,9 @@
 <?php
 
-use App\Infrastructure\Attendance\Persistence\EloquentContextEventRepository;
 use App\Domain\Attendance\Models\SuanLaborLink;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Infrastructure\Attendance\Persistence\EloquentContextEventRepository;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 

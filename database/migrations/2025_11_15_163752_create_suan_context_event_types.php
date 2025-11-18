@@ -12,8 +12,8 @@ return new class extends Migration
         Schema::create('suan_context_event_types', function (Blueprint $table) {
             $table->id();
 
-            $table->string('name', 100);      
-            $table->string('code', 50)->unique(); 
+            $table->string('name', 100);
+            $table->string('code', 50)->unique();
             // ej: 'JUSTIFICATION', 'COMMISSION', 'SPECIAL_SHIFT'
 
             $table->string('description')->nullable();
@@ -33,31 +33,31 @@ return new class extends Migration
                 'name' => 'Justificación',
                 'code' => 'JUSTIFICATION',
                 'color' => 'amber',
-                'icon'  => 'AlertCircle'
+                'icon' => 'AlertCircle',
             ],
             [
                 'name' => 'Observación',
                 'code' => 'OBSERVATION',
                 'color' => 'sky',
-                'icon'  => 'MessageSquare'
+                'icon' => 'MessageSquare',
             ],
             [
                 'name' => 'Turno Especial',
                 'code' => 'SPECIAL_SHIFT',
                 'color' => 'violet',
-                'icon'  => 'Clock'
+                'icon' => 'Clock',
             ],
             [
                 'name' => 'Nota Supervisor',
                 'code' => 'SUPERVISOR_NOTE',
                 'color' => 'indigo',
-                'icon'  => 'UserCheck'
+                'icon' => 'UserCheck',
             ],
             [
                 'name' => 'Comisión',
                 'code' => 'COMMISSION',
                 'color' => 'emerald',
-                'icon'  => 'Briefcase'
+                'icon' => 'Briefcase',
             ],
         ]);
     }

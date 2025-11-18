@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class SuanContextEvent extends Model
 {
     use HasFactory;
-    
+
     protected $table = 'suan_context_events';
 
     protected $fillable = [
@@ -55,11 +55,10 @@ class SuanContextEvent extends Model
     }
 
     /** Scopes */
-
     public function scopeForLaborLinkAndDate($query, int $laborLinkId, string $date)
     {
         return $query->where('labor_link_id', $laborLinkId)
-                     ->whereDate('date', $date);
+            ->whereDate('date', $date);
     }
 
     public function scopeForDate($query, string $date)

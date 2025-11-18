@@ -2,9 +2,9 @@
 
 namespace App\Domain\Attendance\Actions;
 
-use App\Domain\Attendance\Repositories\PersonRepositoryInterface;
-use App\Domain\Attendance\Repositories\LaborLinkRepositoryInterface;
 use App\Domain\Attendance\Repositories\AttendanceRecordRepositoryInterface;
+use App\Domain\Attendance\Repositories\LaborLinkRepositoryInterface;
+use App\Domain\Attendance\Repositories\PersonRepositoryInterface;
 use App\Domain\Attendance\Services\AttendanceRecordProcessor;
 use Illuminate\Support\Collection;
 
@@ -22,9 +22,9 @@ class ProcessAttendanceAction
     ) {}
 
     /**
-     * @param string     $deviceUserId → ID biométrico
-     * @param string     $date         → YYYY-MM-DD
-     * @param Collection $logs         → logs crudos filtrados por device_user_id
+     * @param  string  $deviceUserId  → ID biométrico
+     * @param  string  $date  → YYYY-MM-DD
+     * @param  Collection  $logs  → logs crudos filtrados por device_user_id
      */
     public function execute(string $deviceUserId, string $date, Collection $logs): void
     {

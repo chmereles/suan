@@ -10,6 +10,7 @@ use Illuminate\Console\Command;
 class ResolveDailyCommand extends Command
 {
     protected $signature = 'suan:resolve-day {date?}';
+
     protected $description = 'Recalcula únicamente el resumen diario de asistencia.';
 
     public function handle(

@@ -16,12 +16,11 @@ class RegisterContextEventAction
     ) {}
 
     /**
-     * @param  int         $employeeId
-     * @param  string      $date        Y-m-d
-     * @param  string      $type        commission, rrhh_note, supervisor_note, etc.
-     * @param  string|null $description Texto de la nota
-     * @param  array       $metadata    Info adicional opcional
-     * @param  int|null    $createdBy   ID usuario SUAN
+     * @param  string  $date  Y-m-d
+     * @param  string  $type  commission, rrhh_note, supervisor_note, etc.
+     * @param  string|null  $description  Texto de la nota
+     * @param  array  $metadata  Info adicional opcional
+     * @param  int|null  $createdBy  ID usuario SUAN
      */
     public function __invoke(
         int $employeeId,
@@ -33,12 +32,12 @@ class RegisterContextEventAction
     ) {
         return $this->contextEvents->store([
             'employee_id' => $employeeId,
-            'date'        => Carbon::parse($date)->toDateString(),
-            'type'        => $type,
-            'source'      => $metadata['source'] ?? 'manual',
+            'date' => Carbon::parse($date)->toDateString(),
+            'type' => $type,
+            'source' => $metadata['source'] ?? 'manual',
             'description' => $description,
-            'metadata'    => $metadata,
-            'created_by'  => $createdBy,
+            'metadata' => $metadata,
+            'created_by' => $createdBy,
         ]);
     }
 }

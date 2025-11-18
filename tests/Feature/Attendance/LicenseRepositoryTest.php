@@ -1,9 +1,9 @@
 <?php
 
-use App\Infrastructure\Attendance\Persistence\EloquentLicenseRepository;
 use App\Domain\Attendance\Models\SuanLaborLink;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Infrastructure\Attendance\Persistence\EloquentLicenseRepository;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 

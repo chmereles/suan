@@ -5,10 +5,10 @@ namespace App\Domain\Attendance\Services;
 use App\Domain\Attendance\Enums\AnomalyType;
 use App\Domain\Attendance\Enums\DailyStatus;
 use App\Domain\Attendance\Repositories\AttendanceRecordRepositoryInterface;
-use App\Domain\Attendance\Repositories\DailySummaryRepositoryInterface;
-use App\Domain\Attendance\Repositories\LicenseRepositoryInterface;
 use App\Domain\Attendance\Repositories\ContextEventRepositoryInterface;
+use App\Domain\Attendance\Repositories\DailySummaryRepositoryInterface;
 use App\Domain\Attendance\Repositories\LaborLinkRepositoryInterface;
+use App\Domain\Attendance\Repositories\LicenseRepositoryInterface;
 use Carbon\Carbon;
 
 class DailySummaryResolverService
@@ -25,8 +25,7 @@ class DailySummaryResolverService
     /**
      * Resuelve el estado final del día para un vínculo laboral.
      *
-     * @param int    $laborLinkId
-     * @param string $date        YYYY-MM-DD
+     * @param  string  $date  YYYY-MM-DD
      */
     public function resolve(int $laborLinkId, string $date)
     {
@@ -58,11 +57,11 @@ class DailySummaryResolverService
         // ---------------------------------------------------------
         if (empty($records) && $hasLicense) {
             return $this->summaryRepo->storeOrUpdate($laborLinkId, $date, [
-                'status'            => DailyStatus::LICENSE->value,
-                'has_license'       => true,
+                'status' => DailyStatus::LICENSE->value,
+                'has_license' => true,
                 'has_context_event' => $hasContextEvent,
-                'worked_minutes'    => 0,
-                'anomalies'         => [],
+                'worked_minutes' => 0,
+                'anomalies' => [],
             ]);
         }
 
@@ -71,10 +70,11 @@ class DailySummaryResolverService
         // ---------------------------------------------------------
         if (empty($records) && ! $hasContextEvent) {
             $status = DailyStatus::ABSENT_UNJUSTIFIED->value;
+
             return $this->summaryRepo->storeOrUpdate($laborLinkId, $date, [
-                'status'            => $status,
-                'worked_minutes'    => 0,
-                'anomalies'         => [AnomalyType::NO_MARKS->value => true],
+                'status' => $status,
+                'worked_minutes' => 0,
+                'anomalies' => [AnomalyType::NO_MARKS->value => true],
             ]);
         }
 
@@ -83,21 +83,21 @@ class DailySummaryResolverService
         // ---------------------------------------------------------
         if (empty($records) && $hasContextEvent) {
             return $this->summaryRepo->storeOrUpdate($laborLinkId, $date, [
-                'status'            => DailyStatus::ABSENT_JUSTIFIED->value,
-                'has_license'       => false,
+                'status' => DailyStatus::ABSENT_JUSTIFIED->value,
+                'has_license' => false,
                 'has_context_event' => true,
-                'worked_minutes'    => 0,
-                'anomalies'         => [],
-                'metadata'          => [
+                'worked_minutes' => 0,
+                'anomalies' => [],
+                'metadata' => [
                     'reason' => 'context_event',
                 ],
             ]);
         }
-        
+
         // ---------------------------------------------------------
         // 7) Interpretar Check-In / Check-Out
         // ---------------------------------------------------------
-        $checkIn  = Carbon::parse($records[0]->recorded_at);
+        $checkIn = Carbon::parse($records[0]->recorded_at);
         $checkOut = isset($records[count($records) - 1])
             ? Carbon::parse($records[count($records) - 1]->recorded_at)
             : null;
@@ -123,25 +123,27 @@ class DailySummaryResolverService
         // 9) Guardar resumen final
         // ---------------------------------------------------------
         return $this->summaryRepo->storeOrUpdate($laborLinkId, $date, [
-            'status'              => $status->value,
-            'has_license'         => $hasLicense,
-            'has_context_event'   => $hasContextEvent,
-            'worked_minutes'      => $workedMinutes,
-            'late_minutes'        => $this->calculateLateMinutes($checkIn, $schedule),
+            'status' => $status->value,
+            'has_license' => $hasLicense,
+            'has_context_event' => $hasContextEvent,
+            'worked_minutes' => $workedMinutes,
+            'late_minutes' => $this->calculateLateMinutes($checkIn, $schedule),
             'early_leave_minutes' => $this->calculateEarlyLeaveMinutes($checkOut, $schedule),
-            'anomalies'           => $anomalies,
-            'metadata'            => [
+            'anomalies' => $anomalies,
+            'metadata' => [
                 'record_count' => count($records),
-                'records'      => $records,
+                'records' => $records,
             ],
         ]);
     }
 
     private function calculateLateMinutes(Carbon $checkIn, ?array $schedule): int
     {
-        if (! $schedule) return 0;
+        if (! $schedule) {
+            return 0;
+        }
 
-        $start = Carbon::parse($checkIn->toDateString() . ' ' . $schedule['start']);
+        $start = Carbon::parse($checkIn->toDateString().' '.$schedule['start']);
 
         return $checkIn->greaterThan($start)
             ? $start->diffInMinutes($checkIn)
@@ -150,9 +152,11 @@ class DailySummaryResolverService
 
     private function calculateEarlyLeaveMinutes(?Carbon $checkOut, ?array $schedule): int
     {
-        if (! $checkOut || ! $schedule) return 0;
+        if (! $checkOut || ! $schedule) {
+            return 0;
+        }
 
-        $end = Carbon::parse($checkOut->toDateString() . ' ' . $schedule['end']);
+        $end = Carbon::parse($checkOut->toDateString().' '.$schedule['end']);
 
         return $checkOut->lessThan($end)
             ? $end->diffInMinutes($checkOut)

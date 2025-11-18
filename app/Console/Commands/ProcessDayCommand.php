@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 class ProcessDayCommand extends Command
 {
     protected $signature = 'suan:process-day {date?}';
+
     protected $description = 'Ejecuta sincronización + procesamiento + resumen para un día.';
 
     public function handle(

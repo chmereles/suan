@@ -30,7 +30,7 @@ class ResolveSummaryCommand extends Command
             $action->execute($link->id, $date);
         }
 
-        $this->info('Resumen diario resuelto para ' . count($activeLinks) . ' vínculos laborales activos.');
+        $this->info('Resumen diario resuelto para '.count($activeLinks).' vínculos laborales activos.');
 
         return self::SUCCESS;
     }

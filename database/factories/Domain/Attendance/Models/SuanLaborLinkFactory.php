@@ -21,6 +21,7 @@ class SuanLaborLinkFactory extends Factory
             'position' => fake()->jobTitle,
             'schedule' => ['start' => '09:00', 'end' => '17:00'],
         ];
+
         return $data;
     }
 }

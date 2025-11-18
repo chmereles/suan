@@ -14,7 +14,7 @@ interface LaborLinkRepositoryInterface
 
     /**
      * @return Collection<int, SuanLaborLink>
-     * Obtener todos los vínculos laborales activos de una persona.
+     *                                        Obtener todos los vínculos laborales activos de una persona.
      */
     public function getActiveByPersonId(int $personId): Collection;
 
@@ -37,7 +37,7 @@ interface LaborLinkRepositoryInterface
 
     /**
      * @return Collection<int, SuanLaborLink>
-     * Devuelve todos los vínculos laborales activos del sistema.
+     *                                        Devuelve todos los vínculos laborales activos del sistema.
      */
     public function allActive(): Collection;
 }

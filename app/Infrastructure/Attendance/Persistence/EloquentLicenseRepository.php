@@ -26,7 +26,7 @@ class EloquentLicenseRepository implements LicenseRepositoryInterface
         return SuanLicense::updateOrCreate(
             [
                 'labor_link_id' => $data['labor_link_id'],
-                'date'          => $data['date'],
+                'date' => $data['date'],
             ],
             $data
         );

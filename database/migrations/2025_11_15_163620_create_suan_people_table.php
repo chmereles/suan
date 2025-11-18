@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('document', 20)->unique();
             $table->string('full_name');
 
-            $table->string('device_user_id', 50)->nullable(); // ID del reloj CrossChex            
+            $table->string('device_user_id', 50)->nullable(); // ID del reloj CrossChex
             $table->timestamps();
 
             $table->index('external_id');

@@ -36,7 +36,7 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete(); // usuario del sistema / jefe
-                
+
             $table->timestamps();
 
             $table->index(['labor_link_id', 'date', 'type_id']);

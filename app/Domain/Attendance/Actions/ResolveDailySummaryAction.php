@@ -14,8 +14,8 @@ class ResolveDailySummaryAction
     ) {}
 
     /**
-     * @param  int    $laborLinkId  → ID del vínculo laboral
-     * @param  string $date         → YYYY-MM-DD
+     * @param  int  $laborLinkId  → ID del vínculo laboral
+     * @param  string  $date  → YYYY-MM-DD
      */
     public function execute(int $laborLinkId, string $date)
     {

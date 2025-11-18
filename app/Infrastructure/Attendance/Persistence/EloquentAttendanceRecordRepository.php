@@ -19,16 +19,16 @@ class EloquentAttendanceRecordRepository implements AttendanceRecordRepositoryIn
     public function store(ProcessedRecordDTO $dto): void
     {
         DB::table('suan_attendance_records')->insert([
-            'labor_link_id'     => $dto->laborLinkId,
-            'date'              => $dto->date,
-            'type'              => $dto->type,
-            'recorded_at'       => $dto->recordedAt,
+            'labor_link_id' => $dto->laborLinkId,
+            'date' => $dto->date,
+            'type' => $dto->type,
+            'recorded_at' => $dto->recordedAt,
             'attendance_log_id' => $dto->attendanceLogId,
-            'raw_id'            => $dto->rawId,
-            'raw_payload'       => json_encode($dto->rawPayload),
-            'metadata'          => json_encode($dto->metadata),
-            'created_at'        => now(),
-            'updated_at'        => now(),
+            'raw_id' => $dto->rawId,
+            'raw_payload' => json_encode($dto->rawPayload),
+            'metadata' => json_encode($dto->metadata),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 

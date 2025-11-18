@@ -69,7 +69,7 @@ class AnomalyDetectorService
         // ------------------------------------------------------------------
         $duplicates = $records
             ->groupBy('recorded_at')
-            ->filter(fn($g) => $g->count() > 1);
+            ->filter(fn ($g) => $g->count() > 1);
 
         foreach ($duplicates as $ts => $group) {
             $anomalies[] = [
@@ -105,7 +105,7 @@ class AnomalyDetectorService
         $last = Carbon::parse($records->last()->recorded_at);
 
         // Ejemplo: si la jornada termina a las 13:00
-        $expectedExit = Carbon::parse($date . ' 13:00:00');
+        $expectedExit = Carbon::parse($date.' 13:00:00');
 
         if ($last->lessThan($expectedExit) && $records->count() >= 1) {
             $anomalies[] = [

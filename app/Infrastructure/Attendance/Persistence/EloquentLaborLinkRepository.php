@@ -15,7 +15,7 @@ class EloquentLaborLinkRepository implements LaborLinkRepositoryInterface
 
     /**
      * @return Collection<int, SuanLaborLink>
-     * Obtener todos los vínculos laborales activos de una persona.
+     *                                        Obtener todos los vínculos laborales activos de una persona.
      */
     public function getActiveByPersonId(int $personId): Collection
     {
@@ -35,7 +35,7 @@ class EloquentLaborLinkRepository implements LaborLinkRepositoryInterface
     {
         return SuanLaborLink::updateOrCreate(
             [
-                'source'      => $data['source'],
+                'source' => $data['source'],
                 'external_id' => $data['external_id'],
             ],
             $data

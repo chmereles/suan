@@ -21,7 +21,7 @@ class NullContextEventRepository implements ContextEventRepositoryInterface
     public function store(array $data): SuanContextEvent
     {
         // Creamos un modelo vacío que no se guardará en DB
-        $event = new SuanContextEvent();
+        $event = new SuanContextEvent;
         $event->fill($data ?? []);
 
         return $event;

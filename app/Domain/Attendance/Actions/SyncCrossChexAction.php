@@ -2,9 +2,9 @@
 
 namespace App\Domain\Attendance\Actions;
 
-use App\Infrastructure\Attendance\CrossChex\CrossChexClient;
-use App\Domain\Attendance\Services\CrossChexMapper;
 use App\Domain\Attendance\Repositories\AttendanceRepository;
+use App\Domain\Attendance\Services\CrossChexMapper;
+use App\Infrastructure\Attendance\CrossChex\CrossChexClient;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -20,11 +20,11 @@ class SyncCrossChexAction
     public function execute(Carbon $start, Carbon $end): array
     {
         $syncId = DB::table('attendance_sync_logs')->insertGetId([
-            'source'        => 'crosschex',
-            'triggered_by'  => 'cron',
-            'started_at'    => now(),
-            'created_at'    => now(),
-            'status'        => 'running',
+            'source' => 'crosschex',
+            'triggered_by' => 'cron',
+            'started_at' => now(),
+            'created_at' => now(),
+            'status' => 'running',
         ]);
 
         try {
@@ -42,13 +42,13 @@ class SyncCrossChexAction
             DB::table('attendance_sync_logs')
                 ->where('id', $syncId)
                 ->update([
-                    'finished_at'    => now(),
+                    'finished_at' => now(),
                     'inserted_count' => $insertedCount,
-                    'status'         => 'ok',
+                    'status' => 'ok',
                 ]);
 
             return [
-                'status'   => 'ok',
+                'status' => 'ok',
                 'inserted' => $insertedCount,
             ];
 
@@ -57,8 +57,8 @@ class SyncCrossChexAction
             DB::table('attendance_sync_logs')
                 ->where('id', $syncId)
                 ->update([
-                    'finished_at'   => now(),
-                    'status'        => 'error',
+                    'finished_at' => now(),
+                    'status' => 'error',
                     'error_message' => $e->getMessage(),
                 ]);
 
