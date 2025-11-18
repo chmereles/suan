@@ -28,7 +28,10 @@ class EloquentDailySummaryRepository implements DailySummaryRepositoryInterface
     public function getByDate(string $date): array
     {
         return SuanDailySummary::query()
-            ->with('laborLink:id,full_name,legajo,device_user_id') // relación del modelo
+            ->with([
+                'laborLink:id,person_id', // Traemos el labor_link con su person_id
+                'laborLink.person:id,document,full_name,device_user_id' // Traemos los datos de person
+            ])
             ->where('date', $date)
             ->orderBy('labor_link_id')
             ->get()

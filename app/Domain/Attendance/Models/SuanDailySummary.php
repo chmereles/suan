@@ -40,9 +40,9 @@ class SuanDailySummary extends Model
     ];
 
     /** Relaciones */
-    public function employee(): BelongsTo
+    public function laborLink()
     {
-        return $this->belongsTo(SuanLaborLink::class, 'labor_link_id');
+        return $this->belongsTo(SuanLaborLink::class, 'labor_link_id', 'id');
     }
 
     /** Scopes */

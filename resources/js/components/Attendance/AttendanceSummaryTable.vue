@@ -11,9 +11,9 @@ const props = defineProps<{
 const rows = computed(() =>
   props.summaries.map((s) => ({
     id: s.id,
-    legajo: s.employee?.legajo ?? s.employee_id,
-    nombre: s.employee?.full_name ?? '—',
-    area: s.employee?.area ?? '—',
+    legajo: s.labor_link.person?.document,
+    nombre: s.labor_link.person?.full_name ?? '—',
+    // area: s.employee?.area ?? '—',
     status: s.status,
     worked: s.worked_minutes,
     justified: s.has_context_event || s.has_license, // ajuste realista

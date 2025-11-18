@@ -29,23 +29,6 @@ Route::middleware(['auth', 'verified']) // y el middleware de rol que uses
     });
 
 Route::middleware(['auth'])->prefix('attendance')->group(function () {
-
-    // --------------------------------------------------
-    // Dashboard principal
-    // --------------------------------------------------
-    // Route::get('/', function () {
-    //     $date = request('date', now()->toDateString());
-
-    //     $summaries = app(
-    //         DailySummaryRepositoryInterface::class
-    //     )->forRange($date, $date);
-
-    //     return inertia('Attendance/Dashboard', [
-    //         'date'      => $date,
-    //         'summaries' => $summaries,
-    //     ]);
-    // })->name('attendance.dashboard');
-
     // --------------------------------------------------
     // Resumen diario consolidado
     // --------------------------------------------------

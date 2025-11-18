@@ -13,15 +13,15 @@ const workedHours = Math.floor((props.summary.worked_minutes ?? 0) / 60)
 <template>
   <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
     <td class="px-4 py-2 text-gray-800 dark:text-gray-100">
-      {{ props.summary.employee?.legajo ?? props.summary.employee_id }}
+      {{ props.summary.labor_link.person?.document ?? props.summary.labor_link_id }}
     </td>
 
     <td class="px-4 py-2 text-gray-900 font-medium dark:text-gray-100">
-      {{ props.summary.employee?.full_name ?? '—' }}
+      {{ props.summary.labor_link.person?.full_name ?? '—' }}
     </td>
 
     <td class="px-4 py-2 text-gray-600 dark:text-gray-300">
-      {{ props.summary.employee?.area ?? '—' }}
+      <!-- {{ props.summary.employee?.area ?? '—' }} -->
     </td>
 
     <td class="px-4 py-2">

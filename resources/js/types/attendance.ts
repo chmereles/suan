@@ -10,15 +10,21 @@ export type AttendanceStatus =
 
 export interface Employee {
   id: number
-  legajo: string
-  cuil?: string | null
+  document: string
   full_name: string
-  area?: string | null
+  device_user_id: number
+  // cuil?: string | null
+  // area?: string | null
+}
+
+export interface LaborLink {
+  id: number
+  person: Employee
 }
 
 export interface DailySummary {
   id: number
-  employee_id: number
+  labor_link_id: number
   date: string
   status:
     | 'present'
@@ -35,6 +41,7 @@ export interface DailySummary {
   has_context_event: boolean
   anomalies: any[] | null
   notes: string | null
-  employee: Employee
+  // employee: Employee
+  labor_link: LaborLink
 }
 

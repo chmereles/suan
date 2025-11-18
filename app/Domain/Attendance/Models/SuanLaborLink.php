@@ -32,11 +32,8 @@ class SuanLaborLink extends Model
         return $this->belongsTo(SuanPerson::class, 'person_id');
     }
 
-    // public static function boot()
-    // {
-    //     parent::boot();
-
-    //     // Debugging the connection resolver
-    //     dd(static::$resolver);
-    // }
+    public function dailySummaries()
+    {
+        return $this->hasMany(SuanDailySummary::class, 'labor_link_id');
+    }
 }
