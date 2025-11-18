@@ -181,12 +181,6 @@ Es decir:
 ⮕ deduplica
 ⮕ audita
 
-➋ **ProcessAttendanceRecordsAction**
-⮕ normaliza
-⮕ ordena
-⮕ clasifica
-⮕ guarda en suan_attendance_records
-
 ➌ **ResolveDailySummaryAction**
 ⮕ calcula horas
 ⮕ detecta anomalías
