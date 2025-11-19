@@ -17,8 +17,6 @@ it('stores and retrieves attendance records by labor link', function () {
         type: 'morning',
         recordedAt: '2025-01-10 08:00:00',
         attendanceLogId: 1,
-        rawId: 'RAW123',
-        rawPayload: ['test' => true],
         metadata: ['source' => 'test']
     );
 

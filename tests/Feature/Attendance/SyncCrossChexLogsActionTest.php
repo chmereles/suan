@@ -1,9 +1,9 @@
 <?php
 
 use App\Domain\Attendance\Actions\SyncCrossChexLogsAction;
-use App\Infrastructure\Attendance\CrossChex\CrossChexClient;
-use App\Domain\Attendance\Services\CrossChexMapper;
 use App\Domain\Attendance\Repositories\AttendanceRepository;
+use App\Domain\Attendance\Services\CrossChexMapper;
+use App\Infrastructure\Attendance\CrossChex\CrossChexClient;
 use Carbon\Carbon;
 
 uses()->group('attendance-sync-logs');
@@ -20,7 +20,6 @@ beforeEach(function () {
 afterEach(function () {
     Carbon::setTestNow(); // limpiar estado global
 });
-
 
 /**
  * ---------------------------------------------------------
@@ -68,7 +67,6 @@ it('__invoke() syncs logs using default 15-minute window', function () {
     // expect($result)->toBe(1);
 });
 
-
 /**
  * ---------------------------------------------------------
  * TEST 2 — __invoke() con ventana manual
@@ -108,7 +106,6 @@ it('__invoke() syncs logs using custom window', function () {
     // expect($result)->toBe(5);
 });
 
-
 /**
  * ---------------------------------------------------------
  * TEST 3 — syncRange() directo
@@ -117,7 +114,7 @@ it('__invoke() syncs logs using custom window', function () {
 it('syncRange() calls client, mapper and repository correctly', function () {
 
     $start = Carbon::parse('2025-11-01 00:00:00');
-    $end   = Carbon::parse('2025-11-10 23:59:59');
+    $end = Carbon::parse('2025-11-10 23:59:59');
 
     $raw = [
         ['checktime' => 'A'],

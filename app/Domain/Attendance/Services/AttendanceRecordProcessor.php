@@ -31,27 +31,21 @@ class AttendanceRecordProcessor
         $results = [];
 
         foreach ($logs as $log) {
-            $recordedAt = Carbon::parse($log->recorded_at);
-
-            $rawPayload = $log->raw_payload;
-
-            if (is_string($rawPayload)) {
-                $rawPayload = json_decode($rawPayload, true) ?? [];
-            }
+            // 1. Parsear timestamp crudo (UTC)
+            $recordedAt = Carbon::parse($log->recorded_at)
+                ->setTimezone(config('app.timezone')); // <-- CONVERSIÓN AQUÍ
 
             $results[] = new ProcessedRecordDTO(
                 laborLinkId: $laborLinkId,
                 date: $date,
-                type: $this->inferTimeSegment($recordedAt),   // por ahora: mañana / tarde
                 recordedAt: $recordedAt->toDateTimeString(),
+                type: $this->inferTimeSegment($recordedAt),   // por ahora: mañana / tarde
                 attendanceLogId: $log->id ?? null,
-                rawId: $log->raw_id ?? null,
-                rawPayload: $rawPayload,
                 metadata: [
                     'raw_id' => $log->raw_id ?? null,
                     'device' => $log->device_serial ?? null,
                     'record_type' => $log->record_type ?? null,
-                    'raw_payload' => $log->raw_payload ?? null,
+                    // 'raw_payload' => $log->raw_payload ?? null,
                 ],
             );
         }

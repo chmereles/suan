@@ -12,32 +12,28 @@ return new class extends Migration
 
             $table->id();
 
-            // Empleado
+            // Relación laboral vigente del empleado
             $table->foreignId('labor_link_id')
                 ->constrained('suan_labor_links')
                 ->cascadeOnDelete();
 
-            // Fecha normalizada (solo yyyy-mm-dd)
+            // Día al que pertenece la marca (normalizado)
             $table->date('date')->index();
 
-            // Timestamp real de la marcación (de CrossChex)
+            // Timestamp final normalizado (zona horaria local)
             $table->timestamp('recorded_at')->index();
 
-            // Tipo interpretado por SUAN
-            // Ej: in_morning, out_morning, in_afternoon, out_afternoon
+            // Tipo interpretado por SUAN: in, out, unknown, etc.
             $table->string('type', 50)->nullable()->index();
 
             // Relación con attendance_logs (crudos)
             $table->unsignedBigInteger('attendance_log_id')->nullable()->index();
 
-            // raw_id del registro original (CrossChex 'raw_id')
-            $table->string('raw_id')->nullable()->index();
-
-            // Payload crudo para auditoría
-            $table->json('raw_payload')->nullable();
-
-            // Metadata del procesamiento
+            // Información ligera del procesamiento
+            // Ej: { "normalized": true, "duplicate": false }
             $table->json('metadata')->nullable();
+
+            $table->string('source', 30)->default('device')->index();
 
             $table->timestamps();
 

@@ -9,28 +9,33 @@ use Illuminate\Console\Command;
 
 class ResolveSummaryCommand extends Command
 {
-    protected $signature = 'suan:resolve-summary 
-                            {date? : Fecha a consolidar (YYYY-MM-DD)}';
+    protected $signature = 'suan:summary:daily {date? : Fecha a procesar (YYYY-MM-DD)}';
 
-    protected $description = 'Genera suan_daily_summary para cada vínculo laboral activo.';
+    protected $description = 'Genera o recalcula el resumen diario de asistencia (suan_daily_summary) para todos los vínculos laborales activos.';
 
     public function handle(
         ResolveDailySummaryAction $action,
         LaborLinkRepositoryInterface $laborLinks
     ) {
-        $date = $this->argument('date')
-            ?? Carbon::yesterday()->toDateString();
+        $startedAt = microtime(true);
 
-        $this->info("Resolviendo resumen diario para: $date");
+        $dateArg = $this->argument('date');
+        $date = $dateArg ? Carbon::parse($dateArg)->toDateString()
+                         : Carbon::yesterday()->toDateString();
 
-        // Recuperar todos los vínculos laborales activos
-        $activeLinks = $laborLinks->allActive(); // Collection<SuanLaborLink>
+        $this->info("========== Resolviendo resumen diario para $date ==========");
+
+        $activeLinks = $laborLinks->allActive();
+        $count = $activeLinks->count();
 
         foreach ($activeLinks as $link) {
             $action->execute($link->id, $date);
         }
 
-        $this->info('Resumen diario resuelto para '.count($activeLinks).' vínculos laborales activos.');
+        $elapsed = round(microtime(true) - $startedAt, 2);
+
+        $this->info("✔ Resumen generado para $count vínculos laborales activos.");
+        $this->info("⏱ Tiempo total: {$elapsed}s");
 
         return self::SUCCESS;
     }

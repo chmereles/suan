@@ -2,39 +2,34 @@
 
 namespace App\Domain\Attendance\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property int $labor_link_id
  * @property string $date
- * @property string|null $check_in
- * @property string|null $check_out
- * @property int $worked_minutes
- * @property int $late_minutes
- * @property int $early_leave_minutes
+ * @property string $recorded_at
+ * @property string|null int $type
+ * @property int|null $attendance_log_id
+ * @property string|null $metadata
+ * @property string|null $source
  */
 class SuanAttendanceRecord extends Model
 {
-    use HasFactory;
-
     protected $table = 'suan_attendance_records';
 
     protected $fillable = [
         'labor_link_id',
         'date',
-        'check_in',
-        'check_out',
-        'worked_minutes',
-        'late_minutes',
-        'early_leave_minutes',
-        'source',
+        'recorded_at',
+        'type',
+        'attendance_log_id',
         'metadata',
+        'source',
     ];
 
     protected $casts = [
-        'check_in' => 'datetime',
-        'check_out' => 'datetime',
         'metadata' => 'array',
+        'recorded_at' => 'datetime',
+        'date' => 'date',
     ];
 }

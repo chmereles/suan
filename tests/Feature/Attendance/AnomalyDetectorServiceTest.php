@@ -72,7 +72,7 @@ it('detects out of order marks', function () {
 it('detects large gap between marks', function () {
     $records = new Collection([
         (object) ['recorded_at' => '2025-11-17 08:00:00'],
-        (object) ['recorded_at' => '2025-11-17 14:30:00'], // 6+ horas
+        (object) ['recorded_at' => '2025-11-17 18:30:00'], // 10+ horas
     ]);
 
     $result = test()->service->detect($records, 1, '2025-11-17');

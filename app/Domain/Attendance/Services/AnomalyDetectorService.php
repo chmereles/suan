@@ -69,7 +69,7 @@ class AnomalyDetectorService
         // ------------------------------------------------------------------
         $duplicates = $records
             ->groupBy('recorded_at')
-            ->filter(fn ($g) => $g->count() > 1);
+            ->filter(fn($g) => $g->count() > 1);
 
         foreach ($duplicates as $ts => $group) {
             $anomalies[] = [
@@ -84,11 +84,13 @@ class AnomalyDetectorService
         // Caso 5: Gap demasiado grande entre marcas
         // Ej: entrada 08:00, siguiente marca 14:00 → improbable
         // ------------------------------------------------------------------
+        $MAX_GAP_HOURS = config('suan.attendance.max_gap_hours', 10);
+
         for ($i = 1; $i < $records->count(); $i++) {
             $prev = Carbon::parse($records[$i - 1]->recorded_at);
             $curr = Carbon::parse($records[$i]->recorded_at);
 
-            if ($prev->diffInHours($curr) >= 6) {
+            if ($prev->diffInHours($curr) >= $MAX_GAP_HOURS) {
                 $anomalies[] = [
                     'type' => AnomalyType::LARGE_GAP,
                     'from' => $prev->toDateTimeString(),
@@ -105,7 +107,7 @@ class AnomalyDetectorService
         $last = Carbon::parse($records->last()->recorded_at);
 
         // Ejemplo: si la jornada termina a las 13:00
-        $expectedExit = Carbon::parse($date.' 13:00:00');
+        $expectedExit = Carbon::parse($date . ' 13:00:00');
 
         if ($last->lessThan($expectedExit) && $records->count() >= 1) {
             $anomalies[] = [

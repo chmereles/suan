@@ -1,11 +1,11 @@
 <?php
 
 use App\Domain\Attendance\Actions\SyncCrossChexAction;
+use App\Domain\Attendance\Repositories\AttendanceRepository;
 use App\Domain\Attendance\Services\CrossChexMapper;
 use App\Infrastructure\Attendance\CrossChex\CrossChexClient;
-use App\Domain\Attendance\Repositories\AttendanceRepository;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 uses()->group('attendance-sync');
 
@@ -56,7 +56,7 @@ it('syncs CrossChex records successfully', function () {
     $action = new SyncCrossChexAction($client, $mapper, $repo);
 
     $start = Carbon::parse('2025-11-17 00:00:00');
-    $end   = Carbon::parse('2025-11-17 23:59:59');
+    $end = Carbon::parse('2025-11-17 23:59:59');
 
     $result = $action->execute($start, $end);
 
@@ -97,7 +97,7 @@ it('logs error if exception occurs', function () {
     $action = new SyncCrossChexAction($client, $mapper, $repo);
 
     $start = Carbon::parse('2025-11-17 00:00:00');
-    $end   = Carbon::parse('2025-11-17 23:59:59');
+    $end = Carbon::parse('2025-11-17 23:59:59');
 
     try {
         $action->execute($start, $end);

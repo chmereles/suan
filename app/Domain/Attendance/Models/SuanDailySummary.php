@@ -4,7 +4,6 @@ namespace App\Domain\Attendance\Models;
 
 use App\Domain\Attendance\Enums\DailyStatus;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class SuanDailySummary
@@ -28,15 +27,21 @@ class SuanDailySummary extends Model
         'date',
         'status',
         'worked_minutes',
-        'justified',
+        'late_minutes',
+        'early_leave_minutes',
+        'has_license',
+        'has_context_event',
+        'anomalies',
         'notes',
+        'metadata',
     ];
 
     protected $casts = [
         'status' => DailyStatus::class,
         'date' => 'date',
         'worked_minutes' => 'integer',
-        'justified' => 'boolean',
+        'anomalies' => 'array',
+        'metadata' => 'array',
     ];
 
     /** Relaciones */

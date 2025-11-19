@@ -17,7 +17,6 @@ afterEach(function () {
     Carbon::setTestNow();
 });
 
-
 /**
  * ---------------------------------------------------------
  * TEST 1 — metadata SIN source (usa default: manual)
@@ -56,7 +55,6 @@ it('stores context event with default manual source', function () {
 
     // expect($result)->toBe('stored-event-id');
 });
-
 
 /**
  * ---------------------------------------------------------

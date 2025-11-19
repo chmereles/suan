@@ -122,13 +122,16 @@ class DailySummaryResolverService
         // ---------------------------------------------------------
         // 9) Guardar resumen final
         // ---------------------------------------------------------
+        $late_minutes  = $this->calculateLateMinutes($checkIn, $schedule);
+        $early_leave_minutes  = $this->calculateEarlyLeaveMinutes($checkOut, $schedule);
+
         return $this->summaryRepo->storeOrUpdate($laborLinkId, $date, [
             'status' => $status->value,
             'has_license' => $hasLicense,
             'has_context_event' => $hasContextEvent,
             'worked_minutes' => $workedMinutes,
-            'late_minutes' => $this->calculateLateMinutes($checkIn, $schedule),
-            'early_leave_minutes' => $this->calculateEarlyLeaveMinutes($checkOut, $schedule),
+            'late_minutes' => $late_minutes,
+            'early_leave_minutes' => $early_leave_minutes,
             'anomalies' => $anomalies,
             'metadata' => [
                 'record_count' => count($records),
@@ -145,9 +148,11 @@ class DailySummaryResolverService
 
         $start = Carbon::parse($checkIn->toDateString().' '.$schedule['start']);
 
-        return $checkIn->greaterThan($start)
+        $data = $checkIn->greaterThan($start)
             ? $start->diffInMinutes($checkIn)
             : 0;
+
+        return $data;
     }
 
     private function calculateEarlyLeaveMinutes(?Carbon $checkOut, ?array $schedule): int
@@ -158,8 +163,10 @@ class DailySummaryResolverService
 
         $end = Carbon::parse($checkOut->toDateString().' '.$schedule['end']);
 
-        return $checkOut->lessThan($end)
+        $data = $checkOut->lessThan($end)
             ? $end->diffInMinutes($checkOut)
             : 0;
+            
+        return abs($data);
     }
 }

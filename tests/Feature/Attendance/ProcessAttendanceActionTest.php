@@ -22,13 +22,9 @@ it('processes raw logs into processed attendance records', function () {
     $logs = new Collection([
         (object) [
             'recorded_at' => '2025-01-10 08:02:00',
-            'raw_payload' => '{}',
-            'raw_id' => '1',
         ],
         (object) [
             'recorded_at' => '2025-01-10 12:59:00',
-            'raw_payload' => '{}',
-            'raw_id' => '2',
         ],
     ]);
 
@@ -50,13 +46,9 @@ it('no procesar si no existe persona', function () {
     $logs = new Collection([
         (object) [
             'recorded_at' => '2025-01-10 08:02:00',
-            'raw_payload' => '{}',
-            'raw_id' => '1',
         ],
         (object) [
             'recorded_at' => '2025-01-10 12:59:00',
-            'raw_payload' => '{}',
-            'raw_id' => '2',
         ],
     ]);
 
@@ -82,13 +74,9 @@ it('no procesar si no tiene vinculos laborales', function () {
     $logs = new Collection([
         (object) [
             'recorded_at' => '2025-01-10 08:02:00',
-            'raw_payload' => '{}',
-            'raw_id' => '1',
         ],
         (object) [
             'recorded_at' => '2025-01-10 12:59:00',
-            'raw_payload' => '{}',
-            'raw_id' => '2',
         ],
     ]);
 

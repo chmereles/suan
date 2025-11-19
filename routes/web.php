@@ -1,6 +1,5 @@
 <?php
 
-use App\Domain\Attendance\Repositories\DailySummaryRepositoryInterface;
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Attendance\ContextEventController;
 use App\Http\Controllers\Attendance\DailySummaryController;
