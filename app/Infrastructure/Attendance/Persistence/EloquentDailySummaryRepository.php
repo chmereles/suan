@@ -37,4 +37,14 @@ class EloquentDailySummaryRepository implements DailySummaryRepositoryInterface
             ->get()
             ->toArray();
     }
+
+    public function getByLaborLinkBetweenDates(int $laborLinkId, string $from, string $to): array
+    {
+        return \App\Domain\Attendance\Models\SuanDailySummary::query()
+            ->where('labor_link_id', $laborLinkId)
+            ->whereBetween('date', [$from, $to])
+            ->orderBy('date')
+            ->get()
+            ->toArray();
+    }
 }

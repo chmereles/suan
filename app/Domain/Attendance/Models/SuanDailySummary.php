@@ -3,6 +3,7 @@
 namespace App\Domain\Attendance\Models;
 
 use App\Domain\Attendance\Enums\DailyStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -20,6 +21,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class SuanDailySummary extends Model
 {
+    use HasFactory;
+    
     protected $table = 'suan_daily_summary';
 
     protected $fillable = [

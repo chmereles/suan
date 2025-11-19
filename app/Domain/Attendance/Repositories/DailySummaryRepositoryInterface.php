@@ -21,4 +21,6 @@ interface DailySummaryRepositoryInterface
      * generalmente para mostrarlos en el dashboard.
      */
     public function getByDate(string $date): array;
+
+    public function getByLaborLinkBetweenDates(int $laborLinkId, string $from, string $to): array;
 }

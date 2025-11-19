@@ -39,6 +39,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AttendanceLogRepositoryInterface::class, EloquentAttendanceLogRepository::class);
         $this->app->bind(PersonRepositoryInterface::class, EloquentPersonRepository::class);
         $this->app->bind(LaborLinkRepositoryInterface::class, EloquentLaborLinkRepository::class);
+        $this->app->bind(
+            \App\Domain\Attendance\Repositories\MonthlySummaryRepositoryInterface::class,
+            \App\Infrastructure\Attendance\Persistence\EloquentMonthlySummaryRepository::class
+        );
     }
 
     /**
