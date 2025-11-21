@@ -6,6 +6,8 @@ use App\Domain\Attendance\Models\SuanContextEvent;
 use App\Domain\Attendance\Models\SuanDailySummary;
 use App\Domain\Attendance\Models\SuanLaborLink;
 use App\Domain\Attendance\Services\DailySummaryResolverService;
+use App\Domain\Labor\Models\SuanSchedule;
+use App\Domain\Labor\Models\SuanScheduleWorkday;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -108,4 +110,62 @@ it('resolves no justified absence when no marks', function () {
     $summary = $service->resolve($link->id, '2025-01-10');
 
     expect($summary->status)->toBe(DailyStatus::ABSENT_UNJUSTIFIED);
+});
+
+it('calculates late minutes correctly using schedule windows', function () {
+
+    // -----------------------------------------
+    // 1. Crear vínculo laboral
+    // -----------------------------------------
+    $link = SuanLaborLink::factory()->create();
+
+    // -----------------------------------------
+    // 2. Crear horario
+    // -----------------------------------------
+    $schedule = SuanSchedule::create([
+        'name' => 'Adm Mañana',
+        'type' => 'fixed',
+        'active' => true,
+    ]);
+
+    SuanScheduleWorkday::create([
+        'schedule_id' => $schedule->id,
+        'weekday' => 1, // lunes
+        'segment_index' => 1,
+        'start_time' => '07:00',
+        'end_time' => '13:00',
+        'tolerance_in_minutes' => 10,
+        'tolerance_out_minutes' => 10,
+        'is_working_day' => true,
+    ]);
+
+    $link->update(['schedule_id' => $schedule->id]);
+
+    // -----------------------------------------
+    // 3. Crear registros
+    // Check-in 07:15 (5 min tarde)
+    // Check-out 13:00
+    // -----------------------------------------
+    SuanAttendanceRecord::create([
+        'labor_link_id' => $link->id,
+        'date' => '2025-01-06 07:15:00', // tarde
+        'recorded_at' => '2025-01-06 07:15:00', // tarde
+    ]);
+
+    SuanAttendanceRecord::create([
+        'labor_link_id' => $link->id,
+        'date' => '2025-01-06 13:00:00',
+        'recorded_at' => '2025-01-06 13:00:00',
+    ]);
+
+    // -----------------------------------------
+    // 4. Resolver
+    // -----------------------------------------
+    $service = app(DailySummaryResolverService::class);
+    $service->resolve($link->id, '2025-01-06');
+
+    $summary = SuanDailySummary::firstOrFail();
+
+    expect($summary->late_minutes)->toBe(5);
+    expect($summary->early_leave_minutes)->toBe(0);
 });

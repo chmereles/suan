@@ -2,11 +2,14 @@
 
 namespace App\Domain\Labor\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SuanScheduleWorkday extends Model
 {
+    use HasFactory;
+    
     protected $table = 'suan_schedule_workdays';
 
     protected $fillable = [

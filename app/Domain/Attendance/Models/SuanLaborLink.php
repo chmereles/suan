@@ -2,6 +2,7 @@
 
 namespace App\Domain\Attendance\Models;
 
+use App\Domain\Labor\Models\SuanSchedule;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,12 +20,11 @@ class SuanLaborLink extends Model
         'active',
         'area',
         'position',
-        // 'schedule',
+        'schedule_id'
     ];
 
     protected $casts = [
         'active' => 'boolean',
-        // 'schedule' => 'array',
     ];
 
     public function person(): BelongsTo
@@ -35,5 +35,10 @@ class SuanLaborLink extends Model
     public function dailySummaries()
     {
         return $this->hasMany(SuanDailySummary::class, 'labor_link_id');
+    }
+
+    public function schedule()
+    {
+        return $this->belongsTo(SuanSchedule::class, 'schedule_id');
     }
 }

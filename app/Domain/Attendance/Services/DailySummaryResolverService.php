@@ -9,6 +9,7 @@ use App\Domain\Attendance\Repositories\ContextEventRepositoryInterface;
 use App\Domain\Attendance\Repositories\DailySummaryRepositoryInterface;
 use App\Domain\Attendance\Repositories\LaborLinkRepositoryInterface;
 use App\Domain\Attendance\Repositories\LicenseRepositoryInterface;
+use App\Domain\Labor\Services\ScheduleResolverService;
 use Carbon\Carbon;
 
 class DailySummaryResolverService
@@ -20,6 +21,7 @@ class DailySummaryResolverService
         private ContextEventRepositoryInterface $contextEventRepo,
         private LaborLinkRepositoryInterface $linksRepo,
         private AnomalyDetectorService $anomalyDetector,
+        private ScheduleResolverService $scheduleResolver, // 🔹 Nuevo: dominio Labor
     ) {}
 
     /**
@@ -35,7 +37,18 @@ class DailySummaryResolverService
         // 1) Cargar vínculo laboral (para conocer horario)
         // ---------------------------------------------------------
         $link = $this->linksRepo->findById($laborLinkId);
-        $schedule = $link->schedule ?? null;  // {"start":"08:00","end":"12:00"}
+        $scheduleModel = $link->schedule ?? null;  // SuanSchedule o null
+
+        // Ventanas esperadas de trabajo para el día (Labor)
+        $workWindows = [];
+
+        if ($scheduleModel) {
+            $workWindows = $this->scheduleResolver->resolveFor(
+                $scheduleModel,
+                $carbonDate,
+                $link->schedule_rotation_start_date ?? null
+            );
+        }
 
         // ---------------------------------------------------------
         // 2) Registros procesados del día
@@ -61,19 +74,25 @@ class DailySummaryResolverService
                 'has_license' => true,
                 'has_context_event' => $hasContextEvent,
                 'worked_minutes' => 0,
+                'late_minutes' => 0,
+                'early_leave_minutes' => 0,
                 'anomalies' => [],
             ]);
         }
 
         // ---------------------------------------------------------
-        // 6) Si no hay registros y no está justificado → ausente
+        // 6) Si no hay registros y no está justificado → ausente injustificado
         // ---------------------------------------------------------
         if (empty($records) && ! $hasContextEvent) {
-            $status = DailyStatus::ABSENT_UNJUSTIFIED->value;
+            $status = DailyStatus::ABSENT_UNJUSTIFIED;
 
             return $this->summaryRepo->storeOrUpdate($laborLinkId, $date, [
-                'status' => $status,
+                'status' => $status->value,
+                'has_license' => $hasLicense,
+                'has_context_event' => false,
                 'worked_minutes' => 0,
+                'late_minutes' => 0,
+                'early_leave_minutes' => 0,
                 'anomalies' => [AnomalyType::NO_MARKS->value => true],
             ]);
         }
@@ -82,11 +101,15 @@ class DailySummaryResolverService
         // 6.b) Si no hay registros pero SÍ hay evento de contexto → ausente justificado
         // ---------------------------------------------------------
         if (empty($records) && $hasContextEvent) {
+            $status = DailyStatus::ABSENT_JUSTIFIED;
+
             return $this->summaryRepo->storeOrUpdate($laborLinkId, $date, [
-                'status' => DailyStatus::ABSENT_JUSTIFIED->value,
+                'status' => $status->value,
                 'has_license' => false,
                 'has_context_event' => true,
                 'worked_minutes' => 0,
+                'late_minutes' => 0,
+                'early_leave_minutes' => 0,
                 'anomalies' => [],
                 'metadata' => [
                     'reason' => 'context_event',
@@ -95,7 +118,7 @@ class DailySummaryResolverService
         }
 
         // ---------------------------------------------------------
-        // 7) Interpretar Check-In / Check-Out
+        // 7) Interpretar Check-In / Check-Out (por ahora: primero y último)
         // ---------------------------------------------------------
         $checkIn = Carbon::parse($records[0]->recorded_at);
         $checkOut = isset($records[count($records) - 1])
@@ -111,62 +134,81 @@ class DailySummaryResolverService
         // ---------------------------------------------------------
         $anomalies = $this->anomalyDetector->detect($records, $laborLinkId, $date);
 
-        $status = empty($anomalies) ? DailyStatus::PRESENT : DailyStatus::ANOMALY;
+        $status = empty($anomalies)
+            ? DailyStatus::PRESENT
+            : DailyStatus::ANOMALY;
 
         if ($hasLicense) {
             $status = DailyStatus::LICENSE;
-        } elseif ($hasContextEvent) {
+        } elseif ($hasContextEvent && empty($records)) {
+            // ya cubierto antes, pero lo dejamos claro
             $status = DailyStatus::ABSENT_JUSTIFIED;
         }
 
         // ---------------------------------------------------------
-        // 9) Guardar resumen final
+        // 9) Calcular late / early usando ventanas de horario (Labor)
         // ---------------------------------------------------------
-        $late_minutes  = $this->calculateLateMinutes($checkIn, $schedule);
-        $early_leave_minutes  = $this->calculateEarlyLeaveMinutes($checkOut, $schedule);
+        $lateMinutes  = $this->calculateLateMinutes($checkIn, $workWindows);
+        $earlyLeaveMinutes  = $this->calculateEarlyLeaveMinutes($checkOut, $workWindows);
 
+        // ---------------------------------------------------------
+        // 10) Guardar resumen final
+        // ---------------------------------------------------------
         return $this->summaryRepo->storeOrUpdate($laborLinkId, $date, [
             'status' => $status->value,
             'has_license' => $hasLicense,
             'has_context_event' => $hasContextEvent,
             'worked_minutes' => $workedMinutes,
-            'late_minutes' => $late_minutes,
-            'early_leave_minutes' => $early_leave_minutes,
+            'late_minutes' => $lateMinutes,
+            'early_leave_minutes' => $earlyLeaveMinutes,
             'anomalies' => $anomalies,
             'metadata' => [
                 'record_count' => count($records),
+                // Ojo: acá quizá en producción quieras NO guardar todos los records crudos
                 'records' => $records,
             ],
         ]);
     }
 
-    private function calculateLateMinutes(Carbon $checkIn, ?array $schedule): int
+    /**
+     * @param  array<int, array{start: Carbon, end: Carbon, tolerance_in: int, tolerance_out: int}>  $workWindows
+     */
+    private function calculateLateMinutes(Carbon $checkIn, array $workWindows): int
     {
-        if (! $schedule) {
+        if (empty($workWindows)) {
             return 0;
         }
 
-        $start = Carbon::parse($checkIn->toDateString().' '.$schedule['start']);
+        // Por ahora tomamos el primer tramo como referencia
+        $first = $workWindows[0];
 
-        $data = $checkIn->greaterThan($start)
-            ? $start->diffInMinutes($checkIn)
-            : 0;
+        $allowedStart = $first['start']->copy()->addMinutes($first['tolerance_in']);
 
-        return $data;
+        if ($checkIn->lessThanOrEqualTo($allowedStart)) {
+            return 0;
+        }
+
+        return $allowedStart->diffInMinutes($checkIn);
     }
 
-    private function calculateEarlyLeaveMinutes(?Carbon $checkOut, ?array $schedule): int
+    /**
+     * @param  array<int, array{start: Carbon, end: Carbon, tolerance_in: int, tolerance_out: int}>  $workWindows
+     */
+    private function calculateEarlyLeaveMinutes(?Carbon $checkOut, array $workWindows): int
     {
-        if (! $checkOut || ! $schedule) {
+        if (! $checkOut || empty($workWindows)) {
             return 0;
         }
 
-        $end = Carbon::parse($checkOut->toDateString().' '.$schedule['end']);
+        // Tomamos el último tramo como referencia
+        $last = $workWindows[count($workWindows) - 1];
 
-        $data = $checkOut->lessThan($end)
-            ? $end->diffInMinutes($checkOut)
-            : 0;
-            
-        return abs($data);
+        $expectedEnd = $last['end']->copy()->subMinutes($last['tolerance_out']);
+
+        if ($checkOut->greaterThanOrEqualTo($expectedEnd)) {
+            return 0;
+        }
+
+        return $expectedEnd->diffInMinutes($checkOut);
     }
 }
