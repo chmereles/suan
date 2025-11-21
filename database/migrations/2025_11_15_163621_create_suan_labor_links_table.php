@@ -19,7 +19,7 @@ return new class extends Migration
             $table->boolean('active')->default(true);
             $table->string('area')->nullable();
             $table->string('position')->nullable();
-            $table->json('schedule')->nullable();
+            // $table->json('schedule')->nullable();
             $table->timestamps();
 
             $table->index(['source', 'external_id']);

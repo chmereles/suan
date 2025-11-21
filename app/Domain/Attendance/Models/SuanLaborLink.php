@@ -19,12 +19,12 @@ class SuanLaborLink extends Model
         'active',
         'area',
         'position',
-        'schedule',
+        // 'schedule',
     ];
 
     protected $casts = [
         'active' => 'boolean',
-        'schedule' => 'array',
+        // 'schedule' => 'array',
     ];
 
     public function person(): BelongsTo
