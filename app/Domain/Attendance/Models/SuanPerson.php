@@ -16,6 +16,7 @@ class SuanPerson extends Model
         'external_id',
         'document',
         'full_name',
+        'device_user_id'
     ];
 
     public function laborLinks(): HasMany

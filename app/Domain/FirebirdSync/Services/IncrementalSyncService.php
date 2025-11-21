@@ -3,166 +3,289 @@
 namespace App\Domain\FirebirdSync\Services;
 
 use App\Domain\FirebirdSync\DTO\IncrementalLogDTO;
-use App\Infrastructure\FirebirdSync\Mappers\LegajoMapper;
-use App\Infrastructure\FirebirdSync\Mappers\DatLaboralesMapper;
-use App\Infrastructure\FirebirdSync\Mappers\PlaAgentesMapper;
-use App\Infrastructure\FirebirdSync\Persistence\SuanPersonPersister;
-use App\Infrastructure\FirebirdSync\Persistence\SuanLaborLinkPersister;
+use App\Domain\FirebirdSync\DTO\ChangeDTO;
+use App\Domain\Attendance\Models\SuanPerson;
+use App\Domain\Attendance\Models\SuanLaborLink;
 use Illuminate\Support\Facades\Log;
 
 class IncrementalSyncService
 {
-    public function __construct(
-        private LegajoMapper $legajoMapper,
-        private DatLaboralesMapper $laborMapper,
-        private PlaAgentesMapper $agentMapper,
-
-        private SuanPersonPersister $personPersister,
-        private SuanLaborLinkPersister $laborPersister,
-    ) {}
-
     /**
-     * Punto principal de entrada.
+     * Column mapping por tabla Firebird → atributo SUAN.
+     * Solo incluimos las columnas que realmente nos interesa sincronizar.
      */
+    private array $mapLegajos = [
+        'NUM_DOCU'       => 'document',
+        // 'FEC_NACIMIENTO' => 'birth_date',
+        // 'CUIL'           => 'cuil',
+        // 'NOMBRE'         => 'first_name',
+        // 'APELLIDO'       => 'last_name',
+        // 'EMAIL'          => 'email',
+        // 'SEXO'           => 'sex',
+        // 'EST_CIVIL'      => 'civil_status',
+        // 'PAGO'        => 'payment_method', // si luego tenés el campo en suan_people
+    ];
+
+    private array $mapLaborales = [
+        'REFDEPART'      => 'area',
+        'ACTIVO'         => 'active',
+        // 'FUNCION'        => 'position',
+        // si luego agregás más campos en suan_labor_links:
+        // 'COD_CATEGORIA'  => 'category',
+        // 'FEC_BAJA'       => 'end_date',
+    ];
+
+    private array $mapPlanes = [
+        'AG_DEPENDENCIA_ID' => 'area',
+        'AG_ACTIVO'         => 'active',
+        // 'TIPO'           => 'plan_type', // si luego lo agregás a suan_labor_links
+    ];
+
     public function apply(IncrementalLogDTO $log): void
     {
         try {
             $table = strtoupper($log->table);
 
-            match ($log->operation) {
-                'I' => $this->applyInsert($table, $log),
-                'U' => $this->applyUpdate($table, $log),
-                'D' => $this->applyDelete($table, $log),
-                default => Log::warning("Operación desconocida en log Firebird: {$log->operation}")
+            match ($table) {
+                'LEGAJOS'       => $this->applyForLegajos($log),
+                'DAT_LABORALES' => $this->applyForDatLaborales($log),
+                'PLA_AGENTES'   => $this->applyForPlaAgentes($log),
+                default         => Log::warning("Tabla Firebird no manejada en incremental: {$log->table}")
             };
         } catch (\Throwable $e) {
             Log::error("Error procesando incremental ID {$log->id}: {$e->getMessage()}", [
                 'exception' => $e,
+                'log_id'    => $log->id,
+                'table'     => $log->table,
+                'operation' => $log->operation,
             ]);
         }
     }
 
-    /**
-     * 1. INSERT
+    /* ============================================================
+     *  LEGAJOS → suan_people
+     * ============================================================
      */
-    private function applyInsert(string $table, IncrementalLogDTO $log): void
+    private function applyForLegajos(IncrementalLogDTO $log): void
     {
-        $pk = $this->resolvePrimaryKey($log);
+        $legacyId = $log->pk1;
 
-        // Para resolver un insert, necesitamos consultar el registro completo en Laravel
-        // Firebird solo entrega los cambios parciales en el log, no la fila entera.
-        // Por eso se hace consulta "refetch" desde la tabla importada FULL.
-
-        $row = $this->fetchFromFullSnapshot($table, $pk);
-
-        if (!$row) {
-            Log::warning("No se encontró registro completo luego de INSERT en tabla $table con PK=$pk");
+        if (!$legacyId) {
+            Log::warning("Log LEGAJOS sin pk1 / LEGAJO. ID={$log->id}");
             return;
         }
 
-        $this->dispatchToPersister($table, $row);
-    }
+        // Buscamos persona por legacy_legajo_id
+        $person = SuanPerson::firstOrNew(['external_id' => $legacyId]);
 
-    /**
-     * 2. UPDATE
-     */
-    private function applyUpdate(string $table, IncrementalLogDTO $log): void
-    {
-        $pk = $this->resolvePrimaryKey($log);
-
-        // Pedimos al “full snapshot” el estado actual de la fila
-        $row = $this->fetchFromFullSnapshot($table, $pk);
-
-        if (!$row) {
-            Log::warning("No existe el registro actualizado en $table con PK=$pk. Se ignora.");
-            return;
-        }
-
-        $this->dispatchToPersister($table, $row);
-    }
-
-    /**
-     * 3. DELETE
-     * No borramos datos en SUAN, solo marcamos estado.
-     */
-    private function applyDelete(string $table, IncrementalLogDTO $log): void
-    {
-        $pk = $this->resolvePrimaryKey($log);
-
-        if ($table === 'LEGAJOS') {
-            $this->personPersister->save([
-                'legacy_legajo_id' => $pk,
-                'is_active' => false,
-            ]);
-            return;
-        }
-
-        if ($table === 'PLA_AGENTES') {
-            $this->laborPersister->save([
-                'legacy_legajo_id' => $pk,
-                'status' => 'INACTIVO',
-            ]);
-        }
-    }
-
-    /**
-     * Determina la PK que usa SUAN.
-     */
-    private function resolvePrimaryKey(IncrementalLogDTO $log): ?string
-    {
-        // Normalmente PK1 es LEGAJO
-        return $log->pk1 ?: $log->pk2 ?: $log->pk3;
-    }
-
-    /**
-     * PARA INSERT/UPDATE:
-     * Obtenemos la fila completa desde el snapshot FULL.
-     * Esto permite soportar Firebird → JSON hoy,
-     * y Firebird → SQL directo mañana sin cambiar nada.
-     */
-    private function fetchFromFullSnapshot(string $table, string $pk): ?array
-    {
-        $path = storage_path("firebird_full/{$table}.json");
-
-        if (!file_exists($path)) {
-            Log::error("No existe snapshot FULL para tabla $table.");
-            return null;
-        }
-
-        $data = json_decode(file_get_contents($path), true);
-
-        foreach ($data['rows'] as $row) {
-            if ((string)$row['LEGAJO'] === (string)$pk) {
-                return $row;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Envía la fila mapeada a su persister correspondiente.
-     */
-    private function dispatchToPersister(string $table, array $row): void
-    {
-        switch ($table) {
-            case 'LEGAJOS':
-                $mapped = $this->legajoMapper->map($row);
-                $this->personPersister->save($mapped);
+        // Operaciones
+        switch ($log->operation) {
+            case 'I':
+            case 'U':
+                $this->applyChangesToModel($person, $log->changes, $this->mapLegajos, 'LEGAJOS');
+                // Si es un insert y no tenía nada, al menos activamos
+                if ($log->operation === 'I' && !$person->exists) {
+                    if ($person->is_active === null) {
+                        $person->is_active = true;
+                    }
+                }
+                $person->save();
                 break;
 
-            case 'DAT_LABORALES':
-                $mapped = $this->laborMapper->map($row);
-                $this->laborPersister->save($mapped);
-                break;
-
-            case 'PLA_AGENTES':
-                $mapped = $this->agentMapper->map($row);
-                $this->laborPersister->save($mapped);
+            case 'D':
+                // No borramos físicamente, solo marcamos inactivo
+                if ($person->exists) {
+                    $person->is_active = false;
+                    $person->save();
+                }
                 break;
 
             default:
-                Log::warning("Tabla incremental no manejada: $table");
+                Log::warning("Operación LEGAJOS no manejada: {$log->operation}");
         }
+    }
+
+    /* ============================================================
+     *  DAT_LABORALES → suan_labor_links (source = haberes)
+     *
+     *  pk1 = LEGAJO (PK del registro laboral, NO el del empleado)
+     *  suan_labor_links.external_id = pk1
+     * ============================================================
+     */
+    private function applyForDatLaborales(IncrementalLogDTO $log): void
+    {
+        $externalId = $log->pk1;
+
+        if (!$externalId) {
+            Log::warning("Log DAT_LABORALES sin pk1. ID={$log->id}");
+            return;
+        }
+
+        switch ($log->operation) {
+            case 'I':
+                // Según tu aclaración: los inserts se resuelven volviendo a importar FULL.
+                Log::info("INSERT en DAT_LABORALES ignorado en incremental. ID={$log->id}, PK={$externalId}");
+                return;
+
+            case 'U':
+                $link = SuanLaborLink::where('external_id', $externalId)
+                    ->where('source', 'haberes')
+                    ->first();
+
+                if (!$link) {
+                    Log::warning("No se encontró labor_link(haberes) para external_id={$externalId} en UPDATE. LogID={$log->id}");
+                    return;
+                }
+
+                $this->applyChangesToModel($link, $log->changes, $this->mapLaborales, 'DAT_LABORALES');
+                $link->save();
+                break;
+
+            case 'D':
+                $link = SuanLaborLink::where('external_id', $externalId)
+                    ->where('source', 'haberes')
+                    ->first();
+
+                if ($link) {
+                    $link->active = false;
+                    $link->save();
+                }
+                break;
+
+            default:
+                Log::warning("Operación DAT_LABORALES no manejada: {$log->operation}");
+        }
+    }
+
+    /* ============================================================
+     *  PLA_AGENTES → suan_labor_links (source = planes)
+     *
+     *  pk1 = AG_DOC_NUM (DNI)
+     *  suan_labor_links.external_id = AG_DOC_NUM
+     *  el person se vincula por document (dni)
+     * ============================================================
+     */
+    private function applyForPlaAgentes(IncrementalLogDTO $log): void
+    {
+        $docNum = $log->pk1;
+
+        if (!$docNum) {
+            Log::warning("Log PLA_AGENTES sin pk1 / AG_DOC_NUM. ID={$log->id}");
+            return;
+        }
+
+        switch ($log->operation) {
+            case 'I':
+                // 1) Buscar o crear persona por documento
+                $person = SuanPerson::firstOrCreate(
+                    ['document' => $docNum],
+                    [
+                        // campos mínimos por defecto
+                        'is_active' => true,
+                    ]
+                );
+
+                // 2) Buscar o crear vínculo de planes
+                $link = SuanLaborLink::firstOrNew([
+                    'person_id'   => $person->id,
+                    'source'      => 'planes',
+                    'external_id' => $docNum,
+                ]);
+
+                // 3) Aplicar cambios
+                $this->applyChangesToModel($link, $log->changes, $this->mapPlanes, 'PLA_AGENTES');
+
+                if (!$link->exists) {
+                    // Si no tenía valor de active, asumimos que viene activo
+                    if ($link->active === null) {
+                        $link->active = true;
+                    }
+                }
+
+                $link->save();
+                break;
+
+            case 'U':
+                $link = SuanLaborLink::where('external_id', $docNum)
+                    ->where('source', 'planes')
+                    ->first();
+
+                if (!$link) {
+                    Log::warning("No se encontró labor_link(planes) para AG_DOC_NUM={$docNum} en UPDATE. LogID={$log->id}");
+                    return;
+                }
+
+                $this->applyChangesToModel($link, $log->changes, $this->mapPlanes, 'PLA_AGENTES');
+                $link->save();
+                break;
+
+            case 'D':
+                $link = SuanLaborLink::where('external_id', $docNum)
+                    ->where('source', 'planes')
+                    ->first();
+
+                if ($link) {
+                    $link->active = false;
+                    $link->save();
+                }
+                break;
+
+            default:
+                Log::warning("Operación PLA_AGENTES no manejada: {$log->operation}");
+        }
+    }
+
+    /* ============================================================
+     *  Helper: aplicar cambios de una lista de ChangeDTO a un modelo
+     * ============================================================
+     */
+    /**
+     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @param  ChangeDTO[]                          $changes
+     * @param  array                                $columnMap  [firebird_column => suan_attribute]
+     * @param  string                               $tableName  solo para logs
+     */
+    private function applyChangesToModel($model, array $changes, array $columnMap, string $tableName): void
+    {
+        foreach ($changes as $change) {
+            $column = $change->column;
+
+            if (!isset($columnMap[$column])) {
+                // columna que nos llega en el log pero que aún no mapeamos
+                Log::info("Columna {$tableName}.{$column} sin mapping; se ignora. Log incremental.");
+                continue;
+            }
+
+            $attribute = $columnMap[$column];
+            $newValue  = $this->normalizeValue($tableName, $column, $change->new);
+
+            $model->$attribute = $newValue;
+        }
+    }
+
+    /* ============================================================
+     *  Normalización de valores Firebird → tipos SUAN
+     * ============================================================
+     */
+    private function normalizeValue(string $table, string $column, $value): mixed
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        // Fechas (vienen como 'YYYY-MM-DD' desde Python safe_json)
+        if (in_array($column, ['FEC_NACIMIENTO', 'FEC_ALTA', 'FEC_ALTA_AREA', 'FEC_BAJA', 'AG_FEC_ALTA', 'AG_FEC_BAJA'], true)) {
+            return $value; // Laravel cast a date si el modelo lo define
+        }
+
+        // Booleanos S/N
+        if (in_array($column, ['ACTIVO', 'BLOQUEADO', 'AG_ACTIVO'], true)) {
+            return strtoupper((string) $value) === 'S';
+        }
+
+        // Podés agregar aquí normalización de códigos, enums, etc.
+        // if ($table === 'LEGAJOS' && $column === 'EST_CIVIL') { ... }
+
+        return $value;
     }
 }

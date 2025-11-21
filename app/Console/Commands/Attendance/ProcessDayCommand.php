@@ -35,6 +35,10 @@ class ProcessDayCommand extends Command
             Carbon::parse("$date 00:00:00"),
             Carbon::parse("$date 23:59:59")
         );
+        // $sync->execute(
+        //     Carbon::parse("$date 06:00:00"),
+        //     Carbon::parse("$date 07:10:00")
+        // );
 
         /* ---------------------------------------------------------
          * 2. Procesar asistencia (por device_user_id)
