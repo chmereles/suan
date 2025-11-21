@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\FirebirdSync;
 
 use Illuminate\Console\Command;
 use App\Infrastructure\FirebirdSync\Readers\JsonFullReader;

@@ -8,7 +8,6 @@ use App\Infrastructure\FirebirdSync\Mappers\DatLaboralesMapper;
 use App\Infrastructure\FirebirdSync\Mappers\PlaAgentesMapper;
 use App\Infrastructure\FirebirdSync\Persistence\SuanPersonPersister;
 use App\Infrastructure\FirebirdSync\Persistence\SuanLaborLinkPersister;
-use App\Infrastructure\FirebirdSync\Persistence\SuanAgentPersister;
 use Illuminate\Support\Facades\Log;
 
 class IncrementalSyncService
@@ -20,7 +19,6 @@ class IncrementalSyncService
 
         private SuanPersonPersister $personPersister,
         private SuanLaborLinkPersister $laborPersister,
-        private SuanAgentPersister $agentPersister,
     ) {}
 
     /**
@@ -100,7 +98,7 @@ class IncrementalSyncService
         }
 
         if ($table === 'PLA_AGENTES') {
-            $this->agentPersister->save([
+            $this->laborPersister->save([
                 'legacy_legajo_id' => $pk,
                 'status' => 'INACTIVO',
             ]);
@@ -153,14 +151,14 @@ class IncrementalSyncService
                 $this->personPersister->save($mapped);
                 break;
 
-            case 'DAT_LABORALES_PLA':
+            case 'DAT_LABORALES':
                 $mapped = $this->laborMapper->map($row);
                 $this->laborPersister->save($mapped);
                 break;
 
             case 'PLA_AGENTES':
                 $mapped = $this->agentMapper->map($row);
-                $this->agentPersister->save($mapped);
+                $this->laborPersister->save($mapped);
                 break;
 
             default:

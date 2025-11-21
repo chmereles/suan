@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\FirebirdSync;
 
 use App\Infrastructure\FirebirdSync\Readers\JsonIncrementalReader;
 use App\Domain\FirebirdSync\Services\IncrementalSyncService;

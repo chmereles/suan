@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Attendance;
 
 use App\Domain\Attendance\Actions\ProcessAttendanceAction;
 use App\Domain\Attendance\Actions\ResolveDailySummaryAction;

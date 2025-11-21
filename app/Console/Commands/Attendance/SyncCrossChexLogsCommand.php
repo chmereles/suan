@@ -2,7 +2,7 @@
 
 // app/Console/Commands/SyncCrossChexLogsCommand.php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Attendance;
 
 use App\Domain\Attendance\Actions\SyncCrossChexLogsAction;
 use App\Domain\Attendance\Services\AttendanceSyncLogger;
